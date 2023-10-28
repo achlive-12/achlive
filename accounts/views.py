@@ -4,11 +4,8 @@ from rest_framework.response import Response
 from .models import Customer
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
@@ -71,7 +68,8 @@ class UserLoginView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        if not request.data:  # Check if the request data is empty
+            return Response({'message': 'No data provided in the request.'}, status=status.HTTP_400_BAD_REQUEST)
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
 
