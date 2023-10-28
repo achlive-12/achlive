@@ -88,11 +88,11 @@ class UserLoginView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
         password = serializer.validated_data['password']
 
         try:
-            user = Customer.objects.get(email=username)
+            user = Customer.objects.get(email=email)
             if user.is_active:
                 pass
             else:
@@ -100,7 +100,7 @@ class UserLoginView(CreateAPIView):
         except Customer.DoesNotExist:
             raise AuthenticationFailed(detail="Invalid Email")
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=email, password=password)
         if user is None:
             raise AuthenticationFailed(detail="Invalid password")
 

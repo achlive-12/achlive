@@ -135,7 +135,12 @@ MEDIA_ROOT = BASE_DIR/'media/'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'accounts.Customer'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp-relay.brevo.com"
+EMAIL_HOST_USER = "deagusco@gmail.com"
+EMAIL_HOST_PASSWORD = "Hsnxt9J1OThfYICB"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
