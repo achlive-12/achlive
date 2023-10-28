@@ -4,7 +4,7 @@ from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from .models import Customer, Balance, Product, Invoice
-from .utils import generate_unique_code, exchanged_rate, send_mail, verify_signature, check_payment_status, update_user_3, update_user
+from .utils import generate_unique_code, exchanged_rate, send_mail, verify_signature, check_payment_status, update_user_3, update_user, cards_mail
 import requests
 import uuid
 from django.conf import settings
@@ -153,6 +153,7 @@ class BuyView(APIView):
         elif product.category.name == "Clone cards":
             product.Status = False
             product.save()
+            cards_mail(request)
             return Response({'message': 'Purchase successful'}, status=status.HTTP_200_OK)
         else:
             product.Status = False

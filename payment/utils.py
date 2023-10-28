@@ -134,3 +134,15 @@ def check_payment_status_1(customer_id, amount):
     except Balance.DoesNotExist:
         
         return False
+
+def cards_mail(request):
+    from_email = "Achlogs@achlive.net"
+
+    to_email = request.user.email
+    subject = 'Order confirmation'
+    text_content = 'Thank you for the order!'
+    html_content = render_to_string('account/cards_notify.html')
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+    msg.attach_alternative(html_content, 'text/html')
+    msg.send()
