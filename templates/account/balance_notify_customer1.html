@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    {% load static %}
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 0;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .header img {
+        width: 200px;
+      }
+      .content {
+        background-color: #f4f4f4;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      .content h1 {
+        margin-top: 0;
+        font-size: 24px;
+      }
+      .content p {
+        font-size: 18px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="https://achlive.net/static/images/bg.jpg" alt="Aclive">
+      </div>
+      <div class="content">
+        <h1>Charge started</h1>
+        <p>Dear {{user}},</p>
+        <p>We wanted to let you know that a charge has been started on your account. This charge was to update your balance and we are awaiting your payment.</p>
+        <p>If you have any questions or concerns, please don't hesitate to contact us through chat support.</p>
+        <p>Sometimes balance updates take longer than expected. Please bear with us when that happens</p>
+        <p>Thank you for your business!</p>
+        <p>Achlive.net</p>
+      </div>
+    </div>
+  </body>
+</html>
