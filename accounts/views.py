@@ -28,24 +28,6 @@ class RegistrationView(CreateAPIView):
         headers = self.get_success_headers(serializer.data)
         
         # Generate an activation token
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-       
-        
-        # Send an activation email
-        current_site = get_current_site(request)
-        mail_subject = 'Activate your account'
-        message = render_to_string('account/registration/account_activation_email.html', {
-            'user': user,
-            'domain': current_site.domain,
-            'uid': uid,
-            'token': token,
-        })
-        to_email = user.email
-        email = EmailMessage(mail_subject, message, to=[to_email])
-        email.send()
-
-         # Get the authentication token
         auth_token, _ = Token.objects.get_or_create(user=user)
 
         # Include the token key in the response data
@@ -58,7 +40,7 @@ class RegistrationView(CreateAPIView):
 
     def perform_create(self, serializer):
         user = serializer.save()
-        user.is_active = False
+        user.is_active = True
         user.set_password(serializer.validated_data['password'])
         user.save()
         
