@@ -22,11 +22,14 @@ class RegistrationView(CreateAPIView):
     permission_classes = []
 
     def create(self, request, *args, **kwargs):
+        if not request.data:  # Check if the request data is empty
+            return Response({'message': 'No data provided in the request.'}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        
+
         # Generate an activation token
         auth_token, _ = Token.objects.get_or_create(user=user)
 
@@ -43,7 +46,6 @@ class RegistrationView(CreateAPIView):
         user.is_active = True
         user.set_password(serializer.validated_data['password'])
         user.save()
-        
 
         return user
 
