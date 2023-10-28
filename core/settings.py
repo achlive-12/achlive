@@ -151,8 +151,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    '*',  # Add your React app's domain here
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
 #ASGI_APPLICATION = 'core.routing.application'
