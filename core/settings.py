@@ -72,9 +72,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        "URL":"postgres://default:vX8LF6bMeiHY@ep-restless-unit-98493640-pooler.us-east-1.postgres.vercel-storage.com:5432/verceldb",
+        "PRISMA_URL":"postgres://default:vX8LF6bMeiHY@ep-restless-unit-98493640-pooler.us-east-1.postgres.vercel-storage.com:5432/verceldb?pgbouncer=true&connect_timeout=15",
+        "URL_NON_POOLING":"postgres://default:vX8LF6bMeiHY@ep-restless-unit-98493640.us-east-1.postgres.vercel-storage.com:5432/verceldb",
+        "USER":"default",
+        "HOST":"ep-restless-unit-98493640-pooler.us-east-1.postgres.vercel-storage.com",
+        "PASSWORD":"vX8LF6bMeiHY",
+        "NAME":"verceldb",
     }
 }
 
