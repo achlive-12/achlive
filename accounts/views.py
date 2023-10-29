@@ -91,7 +91,7 @@ class UserLoginView(CreateAPIView):
         # Log the user in within the session
         login(request, user)
 
-        return Response({"message": "Login successful", "token": token.key}, status=status.HTTP_200_OK)
+        return Response({"message": "Login successful", "token": token.key, "username":user.username}, status=status.HTTP_200_OK)
 
 class UserLogoutView(GenericAPIView):
     permission_classes = [IsAuthenticated]

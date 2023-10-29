@@ -87,8 +87,7 @@ class CoinbasePaymentView(APIView):
             return Response(
                 {
                     'addr': address,
-                    'bits': bits,
-                    'url': url
+                    'username': user_obj.username,
                 },
                 status=status.HTTP_201_CREATED
             )
