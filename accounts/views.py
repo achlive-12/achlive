@@ -104,7 +104,8 @@ class UserLogoutView(GenericAPIView):
 
 class DashboardView(ListAPIView):
     serializer_class = InvoiceSerializer
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
 
     def get_queryset(self):
         user = self.request.user
