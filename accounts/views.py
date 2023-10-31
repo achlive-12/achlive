@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.generics import *
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from .models import Customer
 from rest_framework.authtoken.models import Token
@@ -94,7 +95,8 @@ class UserLoginView(CreateAPIView):
         return Response({"message": "Login successful", "token": token.key, "username":user.username}, status=status.HTTP_200_OK)
 
 class UserLogoutView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
 
     def get(self, request, *args, **kwargs):
         logout(request)

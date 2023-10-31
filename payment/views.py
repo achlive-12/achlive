@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from .models import Customer, Balance, Product, Invoice
@@ -26,8 +26,9 @@ class BalanceListView(APIView):
         else:
             return Response({'message': 'Balance not found'}, status=status.HTTP_404_NOT_FOUND)
 
-@permission_classes([IsAuthenticated])
 class CoinbasePaymentView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
     def get(self, request):
         # Generate a unique payment code or ID for tracking purposes
         payment_code = generate_unique_code()
@@ -97,8 +98,10 @@ class CoinbasePaymentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-@permission_classes([IsAuthenticated])
 class BuyView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
+    
     def get(self, request, pk):
         product_id = pk
         try:
@@ -172,8 +175,8 @@ class BuyView(APIView):
         return Response({'message': 'Purchase successful'}, status=status.HTTP_200_OK)
 
 @authentication_classes([BasicAuthentication])
-@permission_classes([AllowAny])
 class CoinbaseWebhookView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         # Verify the request's content type
         content_type = request.META.get('CONTENT_TYPE')
