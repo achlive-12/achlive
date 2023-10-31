@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Balance, Invoice
+from store.serializers import ProductSerializer
 
 class BalanceSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField()
@@ -9,6 +10,7 @@ class BalanceSerializer(serializers.ModelSerializer):
 
 class InvoiceSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField()
+    product = ProductSerializer()
     class Meta:
         model = Invoice
-        fields = '__all__'
+        fields = ['created_by,amount']
