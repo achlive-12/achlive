@@ -13,4 +13,4 @@ class InvoiceSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     class Meta:
         model = Invoice
-        fields = ['created_by','amount','product',]
+        fields = ['created_by','received','product',]
