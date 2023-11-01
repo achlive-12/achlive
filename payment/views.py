@@ -24,7 +24,7 @@ class BalanceListView(APIView):
             serializer = BalanceSerializer(balance)
             return Response(serializer.data)
         else:
-            return Response({'message': 'Balance not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Balance not found',"balance":0.00}, status=status.HTTP_404_NOT_FOUND)
 
 class CoinbasePaymentView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
