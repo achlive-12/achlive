@@ -3,6 +3,7 @@ from rest_framework.generics import *
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from .models import Customer
+from payment.models import Balance
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
@@ -30,7 +31,11 @@ class RegistrationView(CreateAPIView):
 
         # Generate an activation token
         auth_token, _ = Token.objects.get_or_create(user=user)
-
+        Balance.objects.create(
+            order_id="order_id",
+            balance=0,
+            created_by=user
+        )
         # Include the token key in the response data
         response_data = {
             'message': 'User registered successfully',
@@ -112,4 +117,3 @@ class DashboardView(ListAPIView):
         user = self.request.user
         invoices = Invoice.objects.filter(sold=True, created_by=user, received__gte=0)
         return invoices
-
