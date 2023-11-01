@@ -33,7 +33,7 @@ class CoinbasePaymentView(APIView):
         # Generate a unique payment code or ID for tracking purposes
         payment_code = generate_unique_code()
         user = request.user
-        user_obj = Customer.objects.get(username=user)
+        user_obj = Customer.objects.get(email=user.email)
         user_id = user_obj.pk
 
         # Construct the payload with necessary information
@@ -204,19 +204,25 @@ class CoinbaseWebhookView(APIView):
                 if check_payment_status(customer_id, amount):
                     return Response(status=202)
                 else:
+                    customer_id = metadata.get('customer_id')
+                    invoice = Balance.objects.get(created_by=customer_id)
+                    username = invoice.created_by.username
+                    email = invoice.created_by.email
+                    amount = float(event['pricing']['local']['amount'])
+                    update_user_3(username, email, amount)
                     return HttpResponseBadRequest()
 
             elif event_type == 'charge:created':
                 customer_id = metadata.get('customer_id')
                 invoice = Balance.objects.get(created_by=customer_id)
-                username = invoice.created_by.user_name
+                username = invoice.created_by.username
                 email = invoice.created_by.email
                 return Response(status=200)
 
             elif event_type == 'charge:failed':
                 customer_id = metadata.get('customer_id')
                 invoice = Balance.objects.get(created_by=customer_id)
-                username = invoice.created_by.user_name
+                username = invoice.created_by.username
                 email = invoice.created_by.email
                 amount = float(event['pricing']['local']['amount'])
                 update_user_3(username, email, amount)
@@ -225,7 +231,7 @@ class CoinbaseWebhookView(APIView):
             elif event_type == 'charge:pending':
                 customer_id = metadata.get('customer_id')
                 invoice = Balance.objects.get(created_by=customer_id)
-                username = invoice.created_by.user_name
+                username = invoice.created_by.username
                 email = invoice.created_by.email
                 amount = float(event['pricing']['local']['amount'])
                 update_user(username, email, amount)

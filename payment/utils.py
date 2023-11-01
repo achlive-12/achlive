@@ -116,7 +116,7 @@ def check_payment_status(customer_id, amount):
         invoice.balance += amount
         invoice.received = 1
         invoice.save()
-        username = invoice.created_by.user_name
+        username = invoice.created_by.username
         email = invoice.created_by.email
         update_user_2(username,email,amount)
         return True
