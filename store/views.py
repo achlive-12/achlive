@@ -15,7 +15,7 @@ class CategoryListView(generics.ListAPIView):
     def get_queryset(self):
         category_slug = self.kwargs['category_slug']
         category = Category.objects.get(slug=category_slug)
-        products = Product.objects.filter(category=category, status=True)
+        products = Product.objects.filter(category=category, Status=True)
         return products
     
     def get(self, request, *args, **kwargs):
