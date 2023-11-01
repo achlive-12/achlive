@@ -34,7 +34,8 @@ class RegistrationView(CreateAPIView):
         # Include the token key in the response data
         response_data = {
             'message': 'User registered successfully',
-            'token': auth_token.key  # Serialize the token key as a string
+            'token': auth_token.key, # Serialize the token key as a string
+            "username":user.username
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
