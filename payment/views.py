@@ -187,12 +187,11 @@ class CoinbaseWebhookView(APIView):
 
                 return Response({'message': 'Balance updated'},status=200)
             elif int(status) == 0:
-                received = float(invoice.received)
                 url = "https://www.blockonomics.co/api/price?currency=USD"
                 response = requests.get(url)
                 if response.text:
                     response_json = response.json()
-                    usdvalue = received / 1e8 * response_json["price"]
+                    usdvalue = value / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -204,7 +203,7 @@ class CoinbaseWebhookView(APIView):
                 response = requests.get(url)
                 if response.text:
                     response_json = response.json()
-                    usdvalue = received / 1e8 * response_json["price"]
+                    usdvalue = value / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -216,7 +215,7 @@ class CoinbaseWebhookView(APIView):
                 response = requests.get(url)
                 if response.text:
                     response_json = response.json()
-                    usdvalue = received / 1e8 * response_json["price"]
+                    usdvalue = value / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
