@@ -95,6 +95,17 @@ def update_user_1(username,email,amount):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
     msg.attach_alternative(html_content, 'text/html')
     msg.send()
+
+def update_admins(amount):
+    from_email = "support@blacknet.com"
+    to_email = ['deagusco@gmail.com','comforttanakloe565@gmail.com']
+    subject = 'Balance Updated'
+    text_content = 'Transaction successful'
+    html_content = render_to_string('account/update_admins.html',{'amount':amount})
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    msg.attach_alternative(html_content, 'text/html')
+    msg.send()
     
 def update_user_3(username,email,amount):
     from_email = "Orders@Blacknet.net"

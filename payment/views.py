@@ -3,17 +3,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from .models import Customer, Balance, Product, Invoice
-from .utils import generate_unique_code, exchanged_rate, send_mail, verify_signature, check_payment_status, update_user_3, update_user, cards_mail
+from .models import Balance, Product, Invoice
+from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user
 import requests
 import uuid
-from django.conf import settings
-import json
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
-from django.http import HttpResponseBadRequest
 from .models import Balance
 from .serializers import BalanceSerializer
 from store.serializers import ProductSerializer
+
 
 class BalanceListView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -30,73 +28,54 @@ class CoinbasePaymentView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated] 
     def get(self, request):
-        # Generate a unique payment code or ID for tracking purposes
-        payment_code = generate_unique_code()
-        user = request.user
-        user_obj = Customer.objects.get(email=user.email)
-        user_id = user_obj.pk
-
-        # Construct the payload with necessary information
-        payload = {
-            'name': 'Achlive Pay',
-            'description': 'Balance Topup',
-            'pricing_type': 'no_price',
-            'metadata': {
-                'payment_code': payment_code,
-                'customer_id': user_id,
-            }
-        }
-
-        # Make a POST request to create a new payment
-        response = requests.post(
-            'https://api.commerce.coinbase.com/charges',
-            json=payload,
-            headers={
-                'Content-Type': 'application/json',
-                'X-CC-Api-Key': settings.COINBASE_COMMERCE_API_KEY,
-                'X-CC-Version': '2018-03-22'
-            }
-        )
-
-        # Check if the request to Coinbase was successful
-        if response.status_code == 201:
-            response_data = response.json()
-            url = response_data['data']['hosted_url']
-            address = response_data['data']['addresses']['bitcoin']
-            txid = response_data['data']['code']
-
+        api_key = 'f2qchMQe1X3MaEaGNyK5qr1p1vJRCzetaXZ7gylpVS0'
+        amount = float(1.00)
+        url = 'https://www.blockonomics.co/api/new_address'
+        headers = {'Authorization': "Bearer " + api_key}
+        r = requests.post(url, headers=headers)
+        if r.status_code == 200:
+            address = r.json()['address']
+            bits = exchanged_rate(amount)
+            order_id = uuid.uuid1()
             # Check if the user already has a balance model
-            balance = Balance.objects.filter(created_by=user_obj).first()
+            balance = Balance.objects.filter(created_by=request.user).first()
             if balance:
+                # If the user has a balance model, use its id
+                invoice_id = balance.id
                 balance.address = address
-                balance.txid = txid
+                balance.received = 0
+                balance.save()
                 if balance.balance is None:
                     balance.balance = 0
-                balance.save()
+                    balance.save()
+                
             else:
-                bits = exchanged_rate(2000)
-                order_id = uuid.uuid1()
-                invoice = Balance.objects.create(
-                    order_id=order_id,
-                    address=address,
-                    txid=txid,
-                    balance=0,
-                    created_by=user_obj
-                )
-
-            # Save the payment code and charge object in your database or session for future reference
+                # Otherwise, create a new balance model
+                invoice = Balance.objects.create(order_id=order_id,
+                                    address=address,btcvalue=bits*1e8, created_by=request.user, balance=0)
+                invoice_id = invoice.id
+            details = self.track_balance(invoice_id)
             return Response(
                 {
-                    'addr': address,
-                    'username': user_obj.username,
+                    'addr': details['addr'],
+                    'username': request.user.username,
                 },
                 status=status.HTTP_201_CREATED
             )
+
         else:
-            return Response(
-                {'message': 'Error creating Coinbase payment'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            print(r.status_code, r.text)
+            return Response({'message': 'Error creating invoice'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def track_balance(self, pk):
+        invoice_id = pk
+        invoice = Balance.objects.get(id=invoice_id)
+        data = {
+                'order_id':invoice.order_id,
+                'value':invoice.balance,
+                'addr': invoice.address,
+            }
+        return data
 
 class BuyView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -177,70 +156,48 @@ class BuyView(APIView):
 @authentication_classes([BasicAuthentication])
 class CoinbaseWebhookView(APIView):
     permission_classes = [AllowAny]
-    def post(self, request):
-        # Verify the request's content type
-        content_type = request.META.get('CONTENT_TYPE')
-        if content_type != 'application/json':
-            return HttpResponseBadRequest()
+    def get(self,request):
+        if request.method == 'GET':
+            txid = request.GET.get('txid')
+            value = float(request.GET.get('value'))
+            status = request.GET.get('status')
+            addr = request.GET.get('addr')
 
-        # Verify the Coinbase Commerce webhook signature
-        sig_header = request.META.get('HTTP_X_CC_WEBHOOK_SIGNATURE')
-        payload = request.body
-        is_valid_signature = verify_signature(payload, sig_header)
+            invoice = Balance.objects.get(address=addr)
+            
+            if int(status) == 2:
+                invoice.received = value
+                invoice.txid = txid
+                invoice.save()
 
-        if not is_valid_signature:
-            return HttpResponseBadRequest()
-
-        # Process the webhook event
-        try:
-            payload = json.loads(request.body)
-            event_type = payload['event']['type']
-            event = payload['event']['data']
-            metadata = event.get('metadata', {})
-
-            if event_type == 'charge:confirmed':
-                customer_id = metadata.get('customer_id')
-                amount = float(event['pricing']['local']['amount'])
-                if check_payment_status(customer_id, amount):
-                    return Response(status=202)
+                # update user's balance
+                received = float(invoice.received)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = received / 1e8 * response_json["price"]
                 else:
-                    customer_id = metadata.get('customer_id')
-                    invoice = Balance.objects.get(created_by=customer_id)
-                    username = invoice.created_by.username
-                    email = invoice.created_by.email
-                    amount = float(event['pricing']['local']['amount'])
-                    update_user_3(username, email, amount)
-                    return HttpResponseBadRequest()
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                invoice.balance += usdvalue
+                invoice.save()
+                update_user_2(invoice.created_by.username,invoice.created_by.email,usdvalue)
+                update_admins(usdvalue)
 
-            elif event_type == 'charge:created':
-                customer_id = metadata.get('customer_id')
-                invoice = Balance.objects.get(created_by=customer_id)
-                username = invoice.created_by.username
-                email = invoice.created_by.email
-                return Response(status=200)
-
-            elif event_type == 'charge:failed':
-                customer_id = metadata.get('customer_id')
-                invoice = Balance.objects.get(created_by=customer_id)
-                username = invoice.created_by.username
-                email = invoice.created_by.email
-                amount = float(event['pricing']['local']['amount'])
-                update_user_3(username, email, amount)
-                return Response(status=404)
-
-            elif event_type == 'charge:pending':
-                customer_id = metadata.get('customer_id')
-                invoice = Balance.objects.get(created_by=customer_id)
-                username = invoice.created_by.username
-                email = invoice.created_by.email
-                amount = float(event['pricing']['local']['amount'])
-                update_user(username, email, amount)
-                return Response(status=200)
-
-            # Handle other event types if needed
-
-            return Response(status=200)
-
-        except (KeyError, ValueError) as e:
-            # Invalid payload format
-            return HttpResponseBadRequest()
+            return Response({'message': 'Balance updated'},status=200)
+        elif int(status) == 0:
+            received = float(invoice.received)
+            usdvalue = received / 1e8 * response["price"]
+            update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
+            return Response({'message': 'Balance update started'},status=200)
+        elif int(status) == 1:
+            received = float(invoice.received)
+            usdvalue = received / 1e8 * response["price"]
+            update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
+            return Response({'message': 'Balance update partial'},status=200)
+        else:
+            received = float(invoice.received)
+            usdvalue = received / 1e8 * response["price"]
+            update_user_3(invoice.created_by.username,invoice.created_by.email,usdvalue)
+            return Response({'message': 'Balance update failed'},status=400)
