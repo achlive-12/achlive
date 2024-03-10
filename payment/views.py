@@ -185,19 +185,19 @@ class CoinbaseWebhookView(APIView):
                 update_user_2(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 update_admins(usdvalue)
 
-            return Response({'message': 'Balance updated'},status=200)
-        elif int(status) == 0:
-            received = float(invoice.received)
-            usdvalue = received / 1e8 * response["price"]
-            update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
-            return Response({'message': 'Balance update started'},status=200)
-        elif int(status) == 1:
-            received = float(invoice.received)
-            usdvalue = received / 1e8 * response["price"]
-            update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
-            return Response({'message': 'Balance update partial'},status=200)
-        else:
-            received = float(invoice.received)
-            usdvalue = received / 1e8 * response["price"]
-            update_user_3(invoice.created_by.username,invoice.created_by.email,usdvalue)
-            return Response({'message': 'Balance update failed'},status=400)
+                return Response({'message': 'Balance updated'},status=200)
+            elif int(status) == 0:
+                received = float(invoice.received)
+                usdvalue = received / 1e8 * response["price"]
+                update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
+                return Response({'message': 'Balance update started'},status=200)
+            elif int(status) == 1:
+                received = float(invoice.received)
+                usdvalue = received / 1e8 * response["price"]
+                update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
+                return Response({'message': 'Balance update partial'},status=200)
+            else:
+                received = float(invoice.received)
+                usdvalue = received / 1e8 * response["price"]
+                update_user_3(invoice.created_by.username,invoice.created_by.email,usdvalue)
+                return Response({'message': 'Balance update failed'},status=400)
