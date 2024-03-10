@@ -188,16 +188,37 @@ class CoinbaseWebhookView(APIView):
                 return Response({'message': 'Balance updated'},status=200)
             elif int(status) == 0:
                 received = float(invoice.received)
-                usdvalue = received / 1e8 * response["price"]
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = received / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 return Response({'message': 'Balance update started'},status=200)
             elif int(status) == 1:
                 received = float(invoice.received)
-                usdvalue = received / 1e8 * response["price"]
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = received / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 return Response({'message': 'Balance update partial'},status=200)
             else:
                 received = float(invoice.received)
-                usdvalue = received / 1e8 * response["price"]
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = received / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 update_user_3(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 return Response({'message': 'Balance update failed'},status=400)
