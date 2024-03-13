@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Balance, Invoice
+from .models import Balance, Invoice, Telegram_Client
 from store.serializers import ProductSerializer
 
 class BalanceSerializer(serializers.ModelSerializer):
@@ -14,3 +14,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = ['created_by','received','product',]
+
+class Telegram_ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Telegram_Client
+        fields = '__all__'

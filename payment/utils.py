@@ -2,9 +2,19 @@ import requests
 import random
 import string
 import hashlib, hmac
+from telegram import Bot
 from .models import Balance
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+
+APi_token = '6934680718:AAG2qAHel6GuC9NgzxWy9OPvbqpfic7bSyk'
+def main(chat_id,text):
+    bot = Bot(APi_token)
+    try:
+        bot.send_message(chat_id,text)
+    except Exception as e:
+        print(e)
+
 def generate_unique_code():
     # Generate a random alphanumeric code of length 10
     code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))

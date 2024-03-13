@@ -3,14 +3,16 @@ from rest_framework.response import Response
 from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from .models import Balance, Product, Invoice
-from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user
+from .models import Balance, Product, Invoice, Telegram_Client
+from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user, main
 import requests
 import uuid
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
 from .models import Balance
-from .serializers import BalanceSerializer
+from .serializers import BalanceSerializer,Telegram_ClientSerializer
 from store.serializers import ProductSerializer
+from rest_framework.generics import CreateAPIView
+
 
 
 class BalanceListView(APIView):
@@ -220,4 +222,88 @@ class CoinbaseWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 update_user_3(invoice.created_by.username,invoice.created_by.email,usdvalue)
+                return Response({'message': 'Balance update failed'},status=400)
+
+class TelegramClientCreateView(CreateAPIView):
+    queryset = Telegram_Client.objects.all()
+    serializer_class = Telegram_ClientSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        chat_id = request.data.get('chat_id')
+        try:
+            client = Telegram_Client.objects.get(chat_id=chat_id)
+            if client and 'address' in request.data:
+                client.address = request.data['addr']
+                client.save()
+                return Response({'message': 'Address updated'}, status=status.HTTP_200_OK)
+            elif client:
+                return Response({'message': 'Client already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        except Telegram_Client.DoesNotExist:
+            return super().create(request, *args, **kwargs)
+
+class TelegrambaseWebhookView(APIView):
+    permission_classes = [AllowAny]
+    def get(self,request):
+        if request.method == 'GET':
+            txid = request.GET.get('txid')
+            value = float(request.GET.get('value'))
+            status = request.GET.get('status')
+            addr = request.GET.get('addr')
+            chat_id = Telegram_Client.objects.get(address=addr).chat_id
+            
+            if int(status) == 2:
+                
+                # update user's balance
+                received = float(value)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = received / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+                if usdvalue >= 9.8:
+                    text = "Visit the link below to access the mdmbypass codes\nhttps://skipmdm.com/en"
+                    main(chat_id,text)
+
+                return Response({'message': 'message sent'},status=200)
+            elif int(status) == 0:
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = value / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                text = "Payment initialized successfully, waiting for confirmation from the blockchain...."
+                main(chat_id,text)
+                return Response({'message': 'Transaction started'},status=200)
+            elif int(status) == 1:
+                received = float(value)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = value / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                text = "Payment partially confirmed, waiting for last set of confirmation from the blockchain...."
+                main(chat_id,text)
+                return Response({'message': 'Balance update partial'},status=200)
+            else:
+                received = float(value)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = value / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
                 return Response({'message': 'Balance update failed'},status=400)

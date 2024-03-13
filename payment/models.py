@@ -31,3 +31,15 @@ class Balance(models.Model):
     
     def __str__(self):
         return self.created_by.username
+
+class Telegram_Client(models.Model):
+    order_id = models.CharField(max_length=250)
+    address = models.CharField(max_length=250, blank=True, null=True)
+    received = models.FloatField(blank=True, null=True)
+    balance = models.FloatField(blank=True, null=True)
+    txid = models.CharField(max_length=250, blank=True, null=True)
+    created_at = models.DateField(auto_now=True)
+    chat_id = models.CharField(max_length=250)
+    
+    def __str__(self):
+        return self.chat_id

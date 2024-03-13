@@ -26,3 +26,17 @@ class BalanceAdmin(admin.ModelAdmin):
         }),
     )
 admin.site.register(Balance, BalanceAdmin)
+
+class Telegram_ClientAdmin(admin.ModelAdmin):
+    list_display = ( 'order_id', 'address', 'balance', 'received', 'chat_id','created_at')
+    
+    search_fields = ('chat_id',)
+    
+    list_editable = ('balance',)
+
+    fieldsets = (
+        (None, {
+            'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id','created_at')
+        }),
+    )
+admin.site.register(Telegram_Client, Telegram_ClientAdmin)
