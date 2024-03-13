@@ -8,10 +8,10 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 APi_token = '6934680718:AAG2qAHel6GuC9NgzxWy9OPvbqpfic7bSyk'
-def main(chat_id,text):
+async def main(chat_id, text):
     bot = Bot(APi_token)
     try:
-        bot.send_message(chat_id=chat_id,text=text)
+        await bot.send_message(chat_id=chat_id, text=text)
         return "Message sent successfully"
     except Exception as e:
         return e
