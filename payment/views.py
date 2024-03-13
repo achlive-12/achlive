@@ -267,7 +267,7 @@ class TelegrambaseWebhookView(APIView):
                 
                 if usdvalue >= 9.8:
                     text = "Visit the link below to access the mdmbypass codes\nhttps://skipmdm.com/en"
-                    main(chat_id,text)
+                    async_to_sync(main)(chat_id,text)
 
                 return Response({'message': 'message sent'},status=200)
             elif int(status) == 0:
@@ -293,7 +293,7 @@ class TelegrambaseWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 text = "Payment partially confirmed, waiting for last set of confirmation from the blockchain...."
-                main(chat_id,text)
+                async_to_sync(main)(chat_id,text)
                 return Response({'message': 'Balance update partial'},status=200)
             else:
                 received = float(value)
