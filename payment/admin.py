@@ -36,7 +36,7 @@ class Telegram_ClientAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id','created_at')
+            'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id',)
         }),
     )
 admin.site.register(Telegram_Client, Telegram_ClientAdmin)

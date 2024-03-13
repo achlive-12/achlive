@@ -234,7 +234,7 @@ class TelegramClientCreateView(CreateAPIView):
         try:
             client = Telegram_Client.objects.get(chat_id=chat_id)
             if client and 'address' in request.data:
-                client.address = request.data['addr']
+                client.address = request.data['address']
                 client.save()
                 return Response({'message': 'Address updated'}, status=status.HTTP_200_OK)
             elif client:
