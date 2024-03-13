@@ -11,9 +11,10 @@ APi_token = '6934680718:AAG2qAHel6GuC9NgzxWy9OPvbqpfic7bSyk'
 def main(chat_id,text):
     bot = Bot(APi_token)
     try:
-        bot.send_message(chat_id,text)
+        bot.send_message(chat_id=chat_id,text=text)
+        return "Message sent successfully"
     except Exception as e:
-        print(e)
+        return e
 
 def generate_unique_code():
     # Generate a random alphanumeric code of length 10

@@ -280,8 +280,8 @@ class TelegrambaseWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 text = "Payment initialized successfully, waiting for confirmation from the blockchain...."
-                main(chat_id,text)
-                return Response({'message': 'Transaction started'},status=200)
+                telgram=main(chat_id,text)
+                return Response({'message': 'Transaction started','telegram':telgram},status=200)
             elif int(status) == 1:
                 received = float(value)
                 url = "https://www.blockonomics.co/api/price?currency=USD"
