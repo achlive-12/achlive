@@ -12,7 +12,7 @@ from .models import Balance
 from .serializers import BalanceSerializer,Telegram_ClientSerializer
 from store.serializers import ProductSerializer
 from rest_framework.generics import CreateAPIView
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async,async_to_sync
 
 
 class BalanceListView(APIView):
@@ -280,7 +280,7 @@ class TelegrambaseWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 text = "Payment initialized successfully, waiting for confirmation from the blockchain...."
-                telgram=sync_to_async(main)(chat_id,text)
+                telgram=async_to_sync(main)(chat_id,text)
                 return Response({'message': 'Transaction started','telegram':telgram},status=200)
             elif int(status) == 1:
                 received = float(value)
