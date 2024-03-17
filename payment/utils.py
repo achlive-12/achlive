@@ -7,7 +7,6 @@ from .models import Balance
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from twilio.rest import Client
-from .views import voice
 TWILIO_ACCOUNT_SID="AC835de05f30370a769a77c0a4bb8ee4bf"
 TWILIO_AUTH_TOKEN="4086883154cd2ea576b913cb61fe299e"
 TWILIO_PHONE_NUMBER="+15162170229"
