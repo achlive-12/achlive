@@ -43,3 +43,18 @@ class Telegram_Client(models.Model):
     
     def __str__(self):
         return self.chat_id
+
+class Telegram_Otp_bot(models.Model):
+    order_id = models.CharField(max_length=250)
+    address = models.CharField(max_length=250, blank=True, null=True)
+    received = models.FloatField(blank=True, null=True)
+    balance = models.FloatField(blank=True, null=True)
+    otp_code = models.CharField(max_length=50,blank=True, null=True)
+    txid = models.CharField(max_length=250, blank=True, null=True)
+    created_at = models.DateField(auto_now=True)
+    chat_id = models.CharField(max_length=250)
+    number = models.CharField(max_length=50,blank=True,null=True)
+    name = models.CharField(max_length=255,blank=True, null=True)
+    log = models.BooleanField(default=False)
+    def __str__(self):
+        return self.chat_id

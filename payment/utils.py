@@ -6,6 +6,11 @@ from telegram import Bot
 from .models import Balance
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from twilio.rest import Client
+from .views import voice
+TWILIO_ACCOUNT_SID="AC835de05f30370a769a77c0a4bb8ee4bf"
+TWILIO_AUTH_TOKEN="4086883154cd2ea576b913cb61fe299e"
+TWILIO_PHONE_NUMBER="+15162170229"
 
 APi_token = '6934680718:AAG2qAHel6GuC9NgzxWy9OPvbqpfic7bSyk'
 async def main(chat_id, text):
@@ -15,6 +20,7 @@ async def main(chat_id, text):
         return "Message sent successfully"
     except Exception as e:
         return e
+
 
 def generate_unique_code():
     # Generate a random alphanumeric code of length 10
@@ -168,3 +174,16 @@ def cards_mail(request):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
     msg.attach_alternative(html_content, 'text/html')
     msg.send()
+
+def call(number,bank,chat_id):
+    account_sid = TWILIO_ACCOUNT_SID
+    auth_token = TWILIO_AUTH_TOKEN
+    phone_number = TWILIO_PHONE_NUMBER
+    print(account_sid,auth_token,phone_number)
+    client = Client(account_sid, auth_token)
+
+    call = client.calls.create(
+                            url=f'https://achlive-api.vercel.app/pay/voice/{bank}/{chat_id}/',
+                            to=number,
+                            from_=TWILIO_PHONE_NUMBER
+                        )
