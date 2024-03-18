@@ -9,7 +9,7 @@ import requests
 import uuid
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
 from .models import Balance
-from .serializers import BalanceSerializer,Telegram_ClientSerializer
+from .serializers import BalanceSerializer,Telegram_ClientSerializer,Telegram_OtpBotserializer
 from store.serializers import ProductSerializer
 from rest_framework.generics import CreateAPIView
 from asgiref.sync import async_to_sync
@@ -311,19 +311,22 @@ class TelegrambaseWebhookView(APIView):
                 return Response({'message': 'Balance update failed'},status=400)
 
 class TelegramOtpBotCreateView(CreateAPIView):
-    serializer_class = Telegram_ClientSerializer
+    serializer_class = Telegram_OtpBotserializer
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         chat_id = request.data.get('chat_id')
         try:
             client = Telegram_Otp_bot.objects.get(chat_id=chat_id)
-            if 'address' in request.data and 'number' in request.data:
+            if 'address' in request.data:
                 client.address = request.data['address']
-                client.number = request.data['number']
                 client.save()
                 return Response({'message': 'Address updated'}, status=status.HTTP_200_OK)
-            elif 'name' in request.data:
+            if 'number' in request.data:
+                client.number = request.data['number']
+                client.save()
+                return Response({'message': 'number updated'}, status=status.HTTP_200_OK)
+            if 'name' in request.data:
                 client.name = request.data['name']
                 client.save()
                 return Response({'message': 'name updated'}, status=status.HTTP_200_OK)
