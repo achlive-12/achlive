@@ -11,10 +11,18 @@ import os
 TWILIO_ACCOUNT_SID=os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN=os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER=os.environ.get('TWILIO_PHONE_NUMBER')
-
+Bot_token = '6700393132:AAEadQJxz1i-YovZANtrBTnmn6WNnXUwk0k'
 APi_token = os.environ.get('TELEGRAM_API_TOKEN')
 async def main(chat_id, text):
     bot = Bot(APi_token)
+    try:
+        await bot.send_message(chat_id=chat_id, text=text)
+        return "Message sent successfully"
+    except Exception as e:
+        return e
+
+async def bot(chat_id, text):
+    bot = Bot(Bot_token)
     try:
         await bot.send_message(chat_id=chat_id, text=text)
         return "Message sent successfully"

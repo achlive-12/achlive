@@ -4,7 +4,7 @@ from rest_framework.decorators import authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from .models import Balance, Product, Invoice, Telegram_Client,Telegram_Otp_bot
-from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user, main, call
+from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, update_user_3, cards_mail, update_user, main, call, bot
 import requests
 import uuid
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
@@ -360,21 +360,21 @@ class TelegrambotWebhookView(APIView):
                 if otp_bot.log:
                     if usdvalue >= 24.6:
                         text = f"Placing call to {phone_number}...."
-                        async_to_sync(main)(chat_id,text)
-                        call(phone_number)
+                        async_to_sync(bot)(chat_id,text)
+                        call(phone_number,bank,chat_id)
                     else:
                         balance = 25-usdvalue
                         text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
-                        async_to_sync(main)(chat_id,text)
+                        async_to_sync(bot)(chat_id,text)
                 else:
                     if usdvalue >= 14.6:
                         text = f"Placing call to {phone_number}...."
-                        async_to_sync(main)(chat_id,text)
-                        call(phone_number,bank)
+                        async_to_sync(bot)(chat_id,text)
+                        call(phone_number,bank,chat_id)
                     else:
                         balance = 15-usdvalue
                         text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
-                        async_to_sync(main)(chat_id,text)
+                        async_to_sync(bot)(chat_id,text)
                 return Response({'message': 'message sent'},status=200)
             elif int(status) == 0:
                 url = "https://www.blockonomics.co/api/price?currency=USD"
@@ -386,7 +386,7 @@ class TelegrambotWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 text = "Payment initialized successfully, waiting for confirmation from the blockchain...."
-                telgram=async_to_sync(main)(chat_id,text)
+                telgram=async_to_sync(bot)(chat_id,text)
                 return Response({'message': 'Transaction started','telegram':telgram},status=200)
             elif int(status) == 1:
                 received = float(value)
@@ -399,7 +399,7 @@ class TelegrambotWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 text = "Payment partially confirmed, waiting for last set of confirmation from the blockchain...."
-                async_to_sync(main)(chat_id,text)
+                async_to_sync(bot)(chat_id,text)
                 return Response({'message': 'Balance update partial'},status=200)
             else:
                 received = float(value)
