@@ -332,7 +332,7 @@ class TelegramOtpBotCreateView(CreateAPIView):
                 return Response({'message': 'name updated'}, status=status.HTTP_200_OK)
             elif client:
                 return Response({'message': 'Client already exists'}, status=status.HTTP_400_BAD_REQUEST)
-        except Telegram_Client.DoesNotExist:
+        except Telegram_Otp_bot.DoesNotExist:
             return super().create(request, *args, **kwargs)
 
 class TelegrambotWebhookView(APIView):
