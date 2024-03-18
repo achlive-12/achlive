@@ -42,7 +42,7 @@ class Telegram_ClientAdmin(admin.ModelAdmin):
 admin.site.register(Telegram_Client, Telegram_ClientAdmin)
 
 class Telegram_Otp_botAdmin(admin.ModelAdmin):
-    list_display = ( 'order_id', 'address', 'balance', 'received', 'chat_id','created_at','number')
+    list_display = ( 'order_id', 'address', 'name', 'log', 'chat_id','created_at','number')
     
     search_fields = ('chat_id',)
     

@@ -318,18 +318,16 @@ class TelegramOtpBotCreateView(CreateAPIView):
         chat_id = request.data.get('chat_id')
         try:
             client = Telegram_Otp_bot.objects.get(chat_id=chat_id)
-            if 'address' in request.data:
+            if 'address' in request.data and 'name' in request.data:
                 client.address = request.data['address']
-                client.save()
-                return Response({'message': 'Address updated'}, status=status.HTTP_200_OK)
-            if 'number' in request.data:
-                client.number = request.data['number']
-                client.save()
-                return Response({'message': 'number updated'}, status=status.HTTP_200_OK)
-            if 'name' in request.data:
                 client.name = request.data['name']
                 client.save()
-                return Response({'message': 'name updated'}, status=status.HTTP_200_OK)
+                return Response({'message': 'Address updated'}, status=status.HTTP_200_OK)
+            if 'number' in request.data and 'log' in request.data:
+                client.number = request.data['number']
+                client.log = request.data['log']
+                client.save()
+                return Response({'message': 'number updated'}, status=status.HTTP_200_OK)
             elif client:
                 return Response({'message': 'Client already exists'}, status=status.HTTP_400_BAD_REQUEST)
         except Telegram_Otp_bot.DoesNotExist:
