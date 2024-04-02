@@ -14,5 +14,5 @@ urlpatterns=[
     path('bot/receive/', views.TelegrambotWebhookView.as_view(), name="otp_bot"),
     path('voice/<str:bank>/<str:chat_id>/', views.voice, name='voice'),
     path('gather/<str:chat_id>/<str:bank>/', views.gather, name='gather'),
-    path('otp/<str:chat_id>/', views.choice, name="choices")
+    path('otp/<str:chat_id>/<str:bank>/', views.choice, name="choices")
 ]
