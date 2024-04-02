@@ -15,7 +15,7 @@ from rest_framework.generics import CreateAPIView
 from asgiref.sync import async_to_sync
 from django.http import HttpResponse
 from twilio.twiml.voice_response import VoiceResponse, Gather
-
+from django.views.decorators.csrf import csrf_exempt
 
 class BalanceListView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -415,7 +415,7 @@ class TelegrambotWebhookView(APIView):
                 return Response({'message': 'Balance update failed'},status=400)
 
 
-
+@csrf_exempt
 def voice(request,bank,chat_id):
     resp = VoiceResponse()
     gather = Gather(num_digits=1, action=f'/gather/{chat_id}/')
@@ -427,6 +427,7 @@ def voice(request,bank,chat_id):
 
     return HttpResponse(str(resp))
 
+@csrf_exempt
 def gather(request,chat_id,bank):
     # Processes results from the <Gather> prompt in /voice
     # Start our TwiML response
@@ -457,6 +458,7 @@ def gather(request,chat_id,bank):
 
     return HttpResponse(str(resp))
 
+@csrf_exempt
 def choice(request, chat_id):
     resp = VoiceResponse()
 

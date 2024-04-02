@@ -46,7 +46,7 @@ class Telegram_Otp_botAdmin(admin.ModelAdmin):
     
     search_fields = ('chat_id',)
     
-    list_editable = ('balance',)
+    list_editable = ('number',)
 
     fieldsets = (
         (None, {
