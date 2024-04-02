@@ -472,5 +472,10 @@ def choice(request, chat_id):
         
         elif pin[:-1] == '2':
             resp.redirect(f"/pay/gather/{chat_id}/")
+        else:
+            resp.say("Error No digits")
+    else:
+        text = "Error No digits"
+        main(chat_id,text)
 
     return HttpResponse(str(resp))
