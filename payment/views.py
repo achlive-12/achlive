@@ -418,8 +418,8 @@ class CallTrial(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        phone = request.GET.get('phone')
-        chat_id = request.GET.get('chat_id')
+        phone = request.data.get('phone')
+        chat_id = request.data.get('chat_id')
 
         if not phone or not chat_id:
             return Response({'message': 'Missing parameters'}, status=400)
