@@ -439,6 +439,8 @@ class SecurityCheck(APIView):
         if otp_bot.trial_used:
             return Response({'message': 'Security check enabled'}, status=400)
         else:
+            otp_bot.trial_used = True
+            otp_bot.save()
             return Response({'message': 'Security check not enabled'}, status=200)
 
 @csrf_exempt
