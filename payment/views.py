@@ -434,7 +434,7 @@ class SecurityCheck(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        chat_id = request.GET.get('chat_id')
+        chat_id = request.data.get('chat_id')
         otp_bot = Telegram_Otp_bot.objects.get(chat_id=chat_id)
         if otp_bot.trial_used:
             return Response({'message': 'Security check enabled'}, status=400)
