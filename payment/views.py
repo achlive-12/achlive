@@ -417,7 +417,7 @@ class TelegrambotWebhookView(APIView):
 class CallTrial(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    def post(self, request):
         phone = request.GET.get('phone')
         chat_id = request.GET.get('chat_id')
 
