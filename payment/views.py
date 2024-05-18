@@ -416,13 +416,19 @@ class TelegrambotWebhookView(APIView):
 
 class CallTrial(APIView):
     permission_classes = [AllowAny]
-    def get(self,request):
+
+    def get(self, request):
         phone = request.GET.get('phone')
         chat_id = request.GET.get('chat_id')
+
+        if not phone or not chat_id:
+            return Response({'message': 'Missing parameters'}, status=400)
+
         text = f"Placing call to {phone}....☎️"
-        async_to_sync(bot)(chat_id,text)
-        call(phone,'Trial',chat_id)
-        return Response({'message': 'Call placed'},status=200)
+        async_to_sync(bot)(chat_id, text)
+        call(phone, 'Trial', chat_id)
+
+        return Response({'message': 'Call placed'}, status=200)
 
 @csrf_exempt
 def voice(request,bank,chat_id):
