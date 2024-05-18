@@ -56,5 +56,6 @@ class Telegram_Otp_bot(models.Model):
     number = models.CharField(max_length=50,blank=True,null=True)
     name = models.CharField(max_length=255,blank=True, null=True)
     log = models.BooleanField(default=False)
+    trial_used = models.BooleanField(default=False)
     def __str__(self):
         return self.chat_id

