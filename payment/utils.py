@@ -195,7 +195,7 @@ def call(number,bank,chat_id):
                             to=number,
                             from_=TWILIO_PHONE_NUMBER
                         )
-    
+    print(call.status)
     if call.status == 'no-answer':
         message = "Victim did not answer the call"
         async_to_sync(bot)(chat_id,f"{message}")
