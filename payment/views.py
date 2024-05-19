@@ -361,7 +361,7 @@ class TelegrambotWebhookView(APIView):
                     if usdvalue >= 24.6:
                         text = f"Placing call to {phone_number}...."
                         async_to_sync(bot)(chat_id,text)
-                        call(phone_number,bank,chat_id)
+                        call(phone_number,bank,chat_id) 
                     else:
                         balance = 25-usdvalue
                         text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
