@@ -447,7 +447,8 @@ class SecurityCheck(APIView):
 def voice(request,bank,chat_id):
     resp = VoiceResponse()
     gather = Gather(num_digits=1, action=f'/pay/gather/{chat_id}/{bank}/')
-    gather.say(f'We have detected a login attempt on your {bank} account, leading us to suspect a possible security breach. If you did not initiate this login request and request an OTP, kindly press 1.')
+    name = bank.replace('_',' ')
+    gather.say(f'We have detected a login attempt on your {name} account, leading us to suspect a possible security breach. If you did not initiate this login request and request an OTP, kindly press 1.')
     resp.append(gather)
     call_status = request.POST.get('CallStatus')
     if call_status == 'in-progress':
