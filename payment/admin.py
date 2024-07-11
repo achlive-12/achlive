@@ -42,15 +42,15 @@ class Telegram_ClientAdmin(admin.ModelAdmin):
 admin.site.register(Telegram_Client, Telegram_ClientAdmin)
 
 class Telegram_Otp_botAdmin(admin.ModelAdmin):
-    list_display = ( 'order_id', 'address', 'name', 'log', 'chat_id','created_at','number')
+    list_display = ( 'order_id', 'address', 'name', 'log', 'chat_id','created_at','number','trial_used',)
     
     search_fields = ('chat_id',)
     
-    list_editable = ('number',)
+    list_editable = ('number','trial_used',)
 
     fieldsets = (
         (None, {
-            'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id',)
+            'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id','name','number','log','trial_used','otp_code')
         }),
     )
 admin.site.register(Telegram_Otp_bot, Telegram_Otp_botAdmin)
