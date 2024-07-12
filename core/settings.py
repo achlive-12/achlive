@@ -32,9 +32,6 @@ INSTALLED_APPS = [
     "store",
     'rest_framework',
     'rest_framework.authtoken',
-    'channels',
-    'allauth',
-    'allauth.account',
     'dj_rest_auth',
 ]
 
