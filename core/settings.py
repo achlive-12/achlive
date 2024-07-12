@@ -129,8 +129,19 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "static_root"
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR/'media/'
+# Import necessary modules
+from google.oauth2 import service_account
+# Google Cloud Storage settings
+GS_PROJECT_ID = 'uber-clone-first'
+GS_BUCKET_NAME = 'godsonic'
+# settings.py
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    'uber-clone-first-c7bdb50d2274.json'
+)
+# Media files (uploads)
+GS_MEDIA_BUCKET_NAME = GS_BUCKET_NAME
+MEDIA_URL = f'https://storage.googleapis.com/{GS_MEDIA_BUCKET_NAME}/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
