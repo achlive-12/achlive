@@ -59,3 +59,11 @@ class Telegram_Otp_bot(models.Model):
     trial_used = models.BooleanField(default=False)
     def __str__(self):
         return self.chat_id
+
+class Addr(models.Model):
+    address = models.CharField(max_length=250)
+    balance = models.ForeignKey(Balance, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(Customer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.created_by.user_name

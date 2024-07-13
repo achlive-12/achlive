@@ -8,7 +8,7 @@ from .utils import  exchanged_rate, send_mail, update_admins, update_user_2, upd
 import requests
 import uuid
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
-from .models import Balance
+from .models import Balance, Addr
 from .serializers import BalanceSerializer,Telegram_ClientSerializer,Telegram_OtpBotserializer
 from store.serializers import ProductSerializer
 from rest_framework.generics import CreateAPIView
@@ -33,7 +33,7 @@ class CoinbasePaymentView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated] 
     def get(self, request):
-        api_key = 'pj0LgQwm9o3gy8M2THSalKErb1poZlTKhQA1XYfpB4k'
+        api_key = 'pcXP1sIXrsBqYcOyv9dzofmaWCq4bo6aJL9LDadYhEc'
         amount = float(1.00)
         url = 'https://www.blockonomics.co/api/new_address'
         headers = {'Authorization': "Bearer " + api_key}
@@ -53,11 +53,13 @@ class CoinbasePaymentView(APIView):
                 if balance.balance is None:
                     balance.balance = 0
                     balance.save()
+                ad = Addr.objects.create(created_by=request.user, address=address, balance=balance)
                 
             else:
                 # Otherwise, create a new balance model
                 invoice = Balance.objects.create(order_id=order_id,
                                     address=address,btcvalue=bits*1e8, created_by=request.user, balance=0)
+                addr = Addr.objects.create(created_by=request.user, address=address, balance=invoice)
                 invoice_id = invoice.id
             details = self.track_balance(invoice_id)
             return Response(
@@ -168,7 +170,11 @@ class CoinbaseWebhookView(APIView):
             status = request.GET.get('status')
             addr = request.GET.get('addr')
 
-            invoice = Balance.objects.get(address=addr)
+            try:
+                invoice = Balance.objects.get(address=addr)
+            except Balance.DoesNotExist:
+                ad = Addr.objects.get(address=addr)
+                invoice = Balance.objects.get(created_by=ad.created_by)
             
             if int(status) == 2:
                 invoice.received = value
