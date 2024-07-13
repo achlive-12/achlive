@@ -7,6 +7,17 @@ class Category(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     class Meta:
         verbose_name_plural = 'categories'
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+        # Check if the slug already exists
+        if Category.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+            # Add a unique suffix to the slug
+            self.slug = f"{self.slug}-{self.pk}"
+            self.save()
         
     def __str__(self):
            return self.name
