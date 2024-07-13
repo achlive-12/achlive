@@ -5,6 +5,7 @@ from store.models import *
 import csv
 import random
 from django.core.files import File
+from django.utils.text import slugify
 class Command(BaseCommand):
     help = 'Import products from a data file'
 
@@ -20,7 +21,7 @@ class Command(BaseCommand):
             reader = csv.DictReader(file)
             for row in reader:
                 category_name = row['Category']
-                slug = row['Name']+str(random.randint(1,1000000))
+                slug = slugify(row['Name']+str(random.randint(1,1000000)))
                 category, _ = Category.objects.get_or_create(name=category_name)
                 try:
                     pdf_path = row['PDF']

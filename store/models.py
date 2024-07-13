@@ -10,14 +10,13 @@ class Category(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = original_slug = slugify(self.name)
+            num = 1
+            while Category.objects.filter(slug=self.slug).exists():
+                self.slug = f"{original_slug}-{num}"
+                num += 1
         super().save(*args, **kwargs)
 
-        # Check if the slug already exists
-        if Category.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
-            # Add a unique suffix to the slug
-            self.slug = f"{self.slug}-{self.pk}"
-            self.save()
         
     def __str__(self):
            return self.name
