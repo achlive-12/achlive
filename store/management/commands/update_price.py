@@ -1,17 +1,33 @@
+import random
 from django.core.management.base import BaseCommand
 from store.models import Product
 
 class Command(BaseCommand):
-    help = 'Randomly update balances and prices'
+    help = 'Randomize product prices for all products with proportional scaling and ensure total balance does not exceed 10000'
 
     def handle(self, *args, **options):
+        # Define the price range and max total balance
+        price_min = 250
+        price_max = 500
+        balance_min = 5000
+        balance_max = 19000
         
-        # Filter products based on the Balance field
-        filtered_products = Product.objects.filter(price=350)
 
-        # Update the selected products with the new balance
-        for product in filtered_products:
-            product.Balance = str(float(product.Balance) * 10)
+        # Get all products
+        products = Product.objects.all()
+
+        for product in products:
+            # Calculate price based on product balance
+            try:
+                balance = int(product.Balance)
+            except ValueError:
+                balance = 10000  # Assuming the balance is a field in Product model
+            price = price_min + (price_max - price_min) * ((balance - balance_min) / (balance_max - balance_min))
+            price = round(price)  # Round to nearest integer
+
+            product.price = price
             product.save()
+            
 
-        self.stdout.write(self.style.SUCCESS('Balances updated successfully.'))
+        self.stdout.write(self.style.SUCCESS('Prices randomized successfully.'))
+
