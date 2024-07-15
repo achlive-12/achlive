@@ -8,6 +8,4 @@ urlpatterns = [
     path('logout/', UserLogoutView.as_view(), name='logout'),
     path('activate/<str:uidb64>/<str:token>/', AccountActivate.as_view(), name='activate'),
     path('', include('dj_rest_auth.urls')),
-    path('password/reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('password/reset/complete/', PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
