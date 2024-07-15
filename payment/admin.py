@@ -54,3 +54,4 @@ class Telegram_Otp_botAdmin(admin.ModelAdmin):
         }),
     )
 admin.site.register(Telegram_Otp_bot, Telegram_Otp_botAdmin)
+admin.site.register(Addr)
