@@ -66,4 +66,4 @@ class Addr(models.Model):
     created_by = models.ForeignKey(Customer, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.created_by.user_name
+        return self.created_by.username
