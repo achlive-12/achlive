@@ -117,3 +117,16 @@ class DashboardView(ListAPIView):
         user = self.request.user
         invoices = Invoice.objects.filter(sold=True, created_by=user, received__gte=0)
         return invoices
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        user = self.request.user
+        balance = Balance.objects.get(created_by=user).balance
+        response_data = {
+            "username": user.username,
+            "email": user.email,
+            "invoices": serializer.data,
+            "balance": balance
+        }
+        return Response(response_data, status=status.HTTP_200_OK)

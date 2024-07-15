@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "store",
     'rest_framework',
     'rest_framework.authtoken',
+    'allauth',
     'dj_rest_auth',
 ]
 
@@ -160,5 +161,5 @@ CHANNEL_LAYERS = {
     },
 }
 CORS_ALLOW_ALL_ORIGINS = True
-
+DEFAULT_FROM_EMAIL = "support@erblan.com"
 #ASGI_APPLICATION = 'core.routing.application'
