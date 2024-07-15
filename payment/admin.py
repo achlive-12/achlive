@@ -39,7 +39,7 @@ class Telegram_ClientAdmin(admin.ModelAdmin):
             'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id',)
         }),
     )
-admin.site.register(Telegram_Client, Telegram_ClientAdmin)
+#admin.site.register(Telegram_Client, Telegram_ClientAdmin)
 
 class Telegram_Otp_botAdmin(admin.ModelAdmin):
     list_display = ( 'order_id', 'address', 'name', 'log', 'chat_id','created_at','number','trial_used',)
@@ -53,5 +53,5 @@ class Telegram_Otp_botAdmin(admin.ModelAdmin):
             'fields': ( 'order_id', 'address', 'received', 'balance', 'chat_id','name','number','log','trial_used','otp_code')
         }),
     )
-admin.site.register(Telegram_Otp_bot, Telegram_Otp_botAdmin)
+#admin.site.register(Telegram_Otp_bot, Telegram_Otp_botAdmin)
 admin.site.register(Addr)
