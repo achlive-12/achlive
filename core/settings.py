@@ -33,6 +33,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'dj_rest_auth',
 ]
 
@@ -68,7 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-
+SITE_ID = 1
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
