@@ -143,7 +143,7 @@ class BuyView(APIView):
         else:
             product.Status = False
             product.save()
-            #send_mail(request, product)
+            send_mail(request, product)
         
         invoice = Invoice.objects.create(
             order_id=balance.order_id,
