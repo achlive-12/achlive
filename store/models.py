@@ -4,18 +4,12 @@ from django.utils.text import slugify
 # Category Model
 class Category(models.Model):
     location_choices = (
-        (0, 'USA'),
-        (1, 'UK'),
-        (2, 'Canada'),
-        (3, 'Australia'),
-        (4, 'Germany'),
-        (5, 'France'),
-        (6, 'Italy'),
-        (7, 'Spain'),
+        ('USA', 'USA'),
+        ('UK', 'UK'),
     )
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
-    location = models.IntegerField(choices=location_choices, default=0)
+    location = models.CharField(choices=location_choices, default='USA', max_length=255)
     class Meta:
         verbose_name_plural = 'categories'
     
