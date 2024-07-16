@@ -1,20 +1,20 @@
 from django.contrib import admin
 from .models import *
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('status','product', 'order_id', 'address', 'btcvalue', 'received', 'sold', 'created_by','created_at')
+    list_display = ('status','product', 'order_id', 'address', 'btcvalue', 'received', 'sold', 'created_by',)
     list_filter = ('sold',"received")
     search_fields = ('created_by','order_id')
     
-    list_editable = ('sold','created_at','product')
+    list_editable = ('sold','product')
 
     fieldsets = (
         (None, {
-            'fields': ('status', 'order_id', 'address', 'btcvalue', 'received', 'product', 'created_by','created_at')
+            'fields': ('status', 'order_id', 'address', 'btcvalue', 'received', 'product', 'created_by',)
         }),
     )
 admin.site.register(Invoice, InvoiceAdmin)
 class BalanceAdmin(admin.ModelAdmin):
-    list_display = ( 'order_id', 'address', 'balance', 'received', 'created_by','created_at')
+    list_display = ( 'order_id', 'address', 'balance', 'received', 'created_by',)
     
     search_fields = ('created_by__user_name',)
     
@@ -22,7 +22,7 @@ class BalanceAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ( 'order_id', 'address', 'received', 'balance', 'created_by','created_at')
+            'fields': ( 'order_id', 'address', 'received', 'balance', 'created_by',)
         }),
     )
 admin.site.register(Balance, BalanceAdmin)
