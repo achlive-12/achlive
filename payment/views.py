@@ -172,8 +172,6 @@ class DecryptView(APIView):
         if invoice.created_by != request.user:
             return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        if invoice.sold == False:
-            return Response({'message': 'Product not sold'}, status=status.HTTP_400_BAD_REQUEST)
         
         if invoice.decrypted == True:
             return Response({'message': 'Product already decrypted'}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,6 +181,8 @@ class DecryptView(APIView):
         else:
             invoice.decrypted = True
             invoice.save()
+            decryptor = Invoice.objects.filter(created_by=request.user, product=product).first().delete()
+            
         
         return Response({'message': 'Product decrypted'}, status=status.HTTP_200_OK)
 
