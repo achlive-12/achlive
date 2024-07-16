@@ -134,9 +134,6 @@ class BuyView(APIView):
         balance.save()
         
         if product.category.name == "Extraction":
-            user = request.user
-            user.verified = True
-            user.save()
             send_mail(request, product)
         elif product.category.name == "Clone cards":
             product.Status = False
@@ -159,6 +156,35 @@ class BuyView(APIView):
         )
         
         return Response({'message': 'Purchase successful'}, status=status.HTTP_200_OK)
+
+class DecryptView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
+    
+    def get(self, request, pk):
+        invoice_id = pk
+        product = Product.objects.get(name="Decryptor")
+        try:
+            invoice = Invoice.objects.get(id=invoice_id)
+        except Invoice.DoesNotExist:
+            return Response({'message': 'Invoice not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if invoice.created_by != request.user:
+            return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if invoice.sold == False:
+            return Response({'message': 'Product not sold'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if invoice.decrypted == True:
+            return Response({'message': 'Product already decrypted'}, status=status.HTTP_400_BAD_REQUEST)
+        amount_of_decryptors = Invoice.objects.filter(created_by=request.user, product=product).count()
+        if amount_of_decryptors < 1:
+            return Response({'message': 'Insufficient decryptors'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            invoice.decrypted = True
+            invoice.save()
+        
+        return Response({'message': 'Product decrypted'}, status=status.HTTP_200_OK)
 
 @authentication_classes([BasicAuthentication])
 class CoinbaseWebhookView(APIView):

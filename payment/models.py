@@ -16,7 +16,7 @@ class Invoice(models.Model):
     created_at = models.DateTimeField(default=timezone.now,blank=True, null=True)
     created_by = models.ForeignKey(Customer, on_delete=models.CASCADE)
     sold = models.BooleanField(default=False)
-
+    decrypted = models.BooleanField(default=False)
     def __str__(self):
         return self.product.name
     
