@@ -13,7 +13,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     class Meta:
         model = Invoice
-        fields = ['created_by','received','product','decrypted']
+        fields = ['id','created_by','received','product','decrypted']
 
 class Telegram_ClientSerializer(serializers.ModelSerializer):
     class Meta:
