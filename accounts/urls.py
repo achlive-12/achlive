@@ -9,4 +9,5 @@ urlpatterns = [
     path('logout/', UserLogoutView.as_view(), name='logout'),
     path('password/reset/', reset_password_request_token, name='password_reset'),
     path('passwordreset/confirm/', reset_password_confirm, name='password_reset_confirm'),
+    path('password/change/', ChangePasswordView.as_view(), name='change_password'),
 ]

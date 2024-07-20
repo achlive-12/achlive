@@ -123,10 +123,32 @@ class DashboardView(ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         user = self.request.user
         balance = Balance.objects.get(created_by=user).balance
+        invoices = Invoice.objects.filter(sold=True, created_by=user, received__gte=0).count()
         response_data = {
             "username": user.username,
             "email": user.email,
             "invoices": serializer.data,
-            "balance": balance
+            "balance": balance,
+            "total_products": invoices
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+class ChangePasswordView(UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not request.data:  # Check if the request data is empty
+            return Response({'message': 'No data provided in the request.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(serializer.validated_data['old_password']):
+            return Response({'message': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
