@@ -97,8 +97,8 @@ class UserLoginView(CreateAPIView):
 
         # Log the user in within the session
         login(request, user)
-
-        return Response({"message": "Login successful", "token": token.key, "username":user.username}, status=status.HTTP_200_OK)
+        total_products = Invoice.objects.filter(sold=True, created_by=user, received__gte=0).count()
+        return Response({"message": "Login successful", "token": token.key, "username":user.username,"email":user.email,"total_products":total_products}, status=status.HTTP_200_OK)
 
 class UserLogoutView(GenericAPIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
