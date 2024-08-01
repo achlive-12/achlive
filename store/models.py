@@ -6,6 +6,7 @@ class Category(models.Model):
     location_choices = (
         ('USA', 'USA'),
         ('UK', 'UK'),
+        ('Canada', 'Canada'),
     )
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
