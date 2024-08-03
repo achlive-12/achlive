@@ -33,46 +33,56 @@ class CoinbasePaymentView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated] 
     def get(self, request):
-        api_key = 'pcXP1sIXrsBqYcOyv9dzofmaWCq4bo6aJL9LDadYhEc'
-        amount = float(1.00)
-        url = 'https://www.blockonomics.co/api/new_address'
-        headers = {'Authorization': "Bearer " + api_key}
-        r = requests.post(url, headers=headers)
-        if r.status_code == 200:
-            address = r.json()['address']
-            bits = exchanged_rate(amount)
-            order_id = uuid.uuid1()
-            # Check if the user already has a balance model
-            balance = Balance.objects.filter(created_by=request.user).first()
-            if balance:
-                # If the user has a balance model, use its id
-                invoice_id = balance.id
-                balance.address = address
-                balance.received = 0
-                balance.save()
-                if balance.balance is None:
-                    balance.balance = 0
-                    balance.save()
-                ad = Addr.objects.create(created_by=request.user, address=address, balance=balance)
-                
-            else:
-                # Otherwise, create a new balance model
-                invoice = Balance.objects.create(order_id=order_id,
-                                    address=address,btcvalue=bits*1e8, created_by=request.user, balance=0)
-                addr = Addr.objects.create(created_by=request.user, address=address, balance=invoice)
-                invoice_id = invoice.id
-            details = self.track_balance(invoice_id)
-            return Response(
-                {
-                    'addr': details['addr'],
-                    'username': request.user.username,
-                },
-                status=status.HTTP_201_CREATED
-            )
+        try:
+            balance = Balance.objects.get(created_by=request.user)
+            response = {
+                'addr': balance.address,
+                'balance': balance.balance,
+                'username': request.user.username,
+            }
+            return Response(response,status=status.HTTP_201_CREATED)
+        except Balance.DoesNotExist:
 
-        else:
-            print(r.status_code, r.text)
-            return Response({'message': 'Error creating invoice'}, status=status.HTTP_400_BAD_REQUEST)
+            api_key = 'pcXP1sIXrsBqYcOyv9dzofmaWCq4bo6aJL9LDadYhEc'
+            amount = float(1.00)
+            url = 'https://www.blockonomics.co/api/new_address'
+            headers = {'Authorization': "Bearer " + api_key}
+            r = requests.post(url, headers=headers)
+            if r.status_code == 200:
+                address = r.json()['address']
+                bits = exchanged_rate(amount)
+                order_id = uuid.uuid1()
+                # Check if the user already has a balance model
+                balance = Balance.objects.filter(created_by=request.user).first()
+                if balance:
+                    # If the user has a balance model, use its id
+                    invoice_id = balance.id
+                    balance.address = address
+                    balance.received = 0
+                    balance.save()
+                    if balance.balance is None:
+                        balance.balance = 0
+                        balance.save()
+                    ad = Addr.objects.create(created_by=request.user, address=address, balance=balance)
+                    
+                else:
+                    # Otherwise, create a new balance model
+                    invoice = Balance.objects.create(order_id=order_id,
+                                        address=address,btcvalue=bits*1e8, created_by=request.user, balance=0)
+                    addr = Addr.objects.create(created_by=request.user, address=address, balance=invoice)
+                    invoice_id = invoice.id
+                details = self.track_balance(invoice_id)
+                return Response(
+                    {
+                        'addr': details['addr'],
+                        'username': request.user.username,
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+
+            else:
+                print(r.status_code, r.text)
+                return Response({'message': 'Error creating invoice'}, status=status.HTTP_400_BAD_REQUEST)
     
     def track_balance(self, pk):
         invoice_id = pk
