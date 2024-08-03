@@ -22,7 +22,8 @@ class Command(BaseCommand):
             for row in reader:
                 category_name = row['Category']
                 slug = slugify(row['Name']+str(random.randint(1,1000000)))
-                category, _ = Category.objects.get_or_create(name=category_name)
+                location = row['Location']
+                category, _ = Category.objects.get_or_create(name=category_name,location=location)
                 try:
                     pdf_path = row['PDF']
                 except:
