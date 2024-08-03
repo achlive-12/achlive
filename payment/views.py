@@ -210,7 +210,10 @@ class CoinbaseWebhookView(APIView):
                 invoice = Balance.objects.get(address=addr)
             except Balance.DoesNotExist:
                 ad = Addr.objects.get(address=addr)
-                invoice = Balance.objects.get(created_by=ad.created_by)
+                if not ad:
+                    return Response({'message': 'Invoice not found'}, status=status.HTTP_404_NOT_FOUND)
+                else:
+                    invoice = Balance.objects.get(created_by=ad.created_by)
             
             if int(status) == 2:
                 invoice.received = value
@@ -226,7 +229,7 @@ class CoinbaseWebhookView(APIView):
                     usdvalue = received / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
-                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_400_BAD_REQUEST)
                 invoice.balance += usdvalue
                 invoice.save()
                 update_user_2(invoice.created_by.username,invoice.created_by.email,usdvalue)
@@ -241,7 +244,7 @@ class CoinbaseWebhookView(APIView):
                     usdvalue = value / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
-                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_400_BAD_REQUEST)
                 update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 return Response({'message': 'Balance update started'},status=200)
             elif int(status) == 1:
@@ -253,7 +256,7 @@ class CoinbaseWebhookView(APIView):
                     usdvalue = value / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
-                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_400_BAD_REQUEST)
                 update_user(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 return Response({'message': 'Balance update partial'},status=200)
             else:
@@ -265,7 +268,7 @@ class CoinbaseWebhookView(APIView):
                     usdvalue = value / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
-                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_400_BAD_REQUEST)
                 update_user_3(invoice.created_by.username,invoice.created_by.email,usdvalue)
                 return Response({'message': 'Balance update failed'},status=400)
 
