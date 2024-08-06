@@ -209,7 +209,10 @@ class CoinbaseWebhookView(APIView):
             addr = request.GET.get('addr')
 
             try:
-                invoice = Balance.objects.get(address=addr)
+                invoice = Balance.objects.filter(address=addr)
+                for i in invoice:
+                    if i.created_by.last_login:
+                        invoice = i
             except Balance.DoesNotExist:
                 ad = Addr.objects.get(address=addr)
                 if not ad:
