@@ -209,12 +209,10 @@ class CoinbaseWebhookView(APIView):
             addr = request.GET.get('addr')
 
             try:
-                invoice = Balance.objects.filter(address=addr)
-                for i in invoice:
-                    if i.created_by.last_login:
-                        invoice = i
-            except Balance.DoesNotExist:
-                ad = Addr.objects.get(address=addr)
+                invoice = Balance.objects.get(address=addr)
+                
+            except:
+                ad = Addr.objects.filter(address=addr).first()
                 if not ad:
                     return Response({'message': 'Invoice not found'}, status=status.HTTP_404_NOT_FOUND)
                 else:
