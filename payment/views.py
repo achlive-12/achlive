@@ -214,7 +214,7 @@ class CoinbaseWebhookView(APIView):
             except:
                 ad = Addr.objects.filter(address=addr).first()
                 if not ad:
-                    return Response({'message': 'Invoice not found'}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({'message': 'Invoice not found'}, status=404)
                 else:
                     invoice = Balance.objects.get(created_by=ad.created_by)
             
@@ -232,7 +232,7 @@ class CoinbaseWebhookView(APIView):
                     usdvalue = received / 1e8 * response_json["price"]
                 else:
                     # Handle the case where the response is empty
-                    return Response({'message': 'Error: Received an empty response'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'message': 'Error: Received an empty response'}, status=400)
                 invoice.balance += usdvalue
                 invoice.save()
                 update_user_2(invoice.created_by.username,invoice.created_by.email,usdvalue)
