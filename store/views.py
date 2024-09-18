@@ -5,7 +5,6 @@ from rest_framework.response import Response
 #import pagination
 from rest_framework.pagination import PageNumberPagination
 
-
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all().exclude(name="Extraction")
     serializer_class = CategorySerializer
