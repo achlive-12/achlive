@@ -22,7 +22,6 @@ class CategoryList(generics.ListCreateAPIView):
             return Response(serializer.data)
 
 
-
 class CategoryListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
