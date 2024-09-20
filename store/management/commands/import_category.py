@@ -1,6 +1,7 @@
 import csv
 from django.core.management.base import BaseCommand
 from store.models import Category
+from django.utils.text import slugify
 
 class Command(BaseCommand):
     help = 'Import categories from a CSV file'
@@ -10,21 +11,20 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         file_path = options['file_path']
+        categories_to_create = []
 
-        with open(file_path, 'r') as csvfile:
+        with open(file_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 name = row['name']
-                slug = row['slug']
+                slug = row['slug'] if row['slug'] else slugify(name)
                 location = row['location']
-                
 
-                # Create or update the category in the database
-                Category.objects.update_or_create(
+                categories_to_create.append(Category(
+                    name=name,
                     slug=slug,
-                    defaults={
-                        'name': name,
-                    }
-                )
+                    location=location
+                ))
 
+        Category.objects.bulk_create(categories_to_create, ignore_conflicts=True)
         self.stdout.write(self.style.SUCCESS('Categories imported successfully.'))

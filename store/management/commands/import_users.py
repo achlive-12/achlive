@@ -1,5 +1,5 @@
 import csv
-from account.models import Customer
+from accounts.models import Customer
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 
@@ -11,45 +11,32 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         file_path = options['file_path']
+        users_to_create = []
 
-        with open(file_path, 'r') as csvfile:
+        with open(file_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 username = row['username']
                 email = row['email']
                 password = row['password']
-                is_active = row['is_active']
-                verified = row['verified']
-                is_staff = row['is_staff']
+                is_active = row['is_active'].strip("'").lower() == 'true'
+                verified = row['verified'].strip("'").lower() == 'true'
+                is_staff = row['is_staff'].strip("'").lower() == 'true'
 
-                # Remove single quotes unless the string starts with 'T' or 'F'
-                if not (is_active.startswith('T') or is_active.startswith('F')):
-                    is_active = is_active.strip("'")
-                if not (verified.startswith('T') or verified.startswith('F')):
-                    verified = verified.strip("'")
-                if not (is_staff.startswith('T') or is_staff.startswith('F')):
-                    is_staff = is_staff.strip("'")
+                user_data = {
+                    'username': username,
+                    'email': email,
+                    'is_active': is_active,
+                    'verified': verified,
+                    'is_staff': is_staff,
+                    'password': password,
+                }
 
-                # Convert 'TRUE' and 'FALSE' to boolean values
-                is_active = is_active.lower() == 'true'
-                verified = verified.lower() == 'true'
-                is_staff = is_staff.lower() == 'true'
+                users_to_create.append(Customer(**user_data))
 
-                try:
-                    user, created = Customer.objects.get_or_create(user_name=username, defaults={'email': email})
-                    if not created:
-                        # User already exists, skip or update as needed.
-                        pass
-                    else:
-                        # Set other user attributes and save the new user.
-                        user.email = email
-                        user.is_active = is_active
-                        user.verified = verified
-                        user.is_staff = is_staff
-                        user.password = password
-                        user.save()
-                except IntegrityError:
-                    # Handle the case when IntegrityError is raised (e.g., duplicate username).
-                    pass
+        try:
+            Customer.objects.bulk_create(users_to_create, ignore_conflicts=True)
+        except IntegrityError as e:
+            self.stdout.write(self.style.ERROR(f"Error importing users: {e}"))
 
         self.stdout.write(self.style.SUCCESS("User import complete."))

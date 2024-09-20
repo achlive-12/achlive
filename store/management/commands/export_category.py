@@ -12,11 +12,11 @@ class Command(BaseCommand):
         categories = Category.objects.all()
 
         with open(options['file_path'], 'w', newline='') as csvfile:
-            fieldnames = ['name', 'slug', 'location', 'number']
+            fieldnames = ['name', 'slug', 'location']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
             for category in categories:
-                writer.writerow({'name': category.name, 'slug': category.slug, 'location': category.location, 'number': category.number()})
+                writer.writerow({'name': category.name, 'slug': category.slug, 'location': category.location})
 
         self.stdout.write(self.style.SUCCESS("Category export complete."))

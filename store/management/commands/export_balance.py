@@ -11,11 +11,18 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options['file_path']
 
-        with open(file_path, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['status', 'order_id', 'address', 'btcvalue', 'received', 'balance', 'created_by'])
+        with open(file_path, 'w', newline='', encoding='utf-8') as file:
+            fieldnames = ['order_id', 'address', 'received', 'balance', 'created_by']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
 
+            writer.writeheader()
             for product in Balance.objects.all():
-                writer.writerow([product.status, product.order_id, product.address, product.btcvalue, product.received, product.balance, product.created_by])
+                writer.writerow({
+                    'order_id': product.order_id,
+                    'address': product.address,
+                    'received': product.received,
+                    'balance': product.balance,
+                    'created_by': product.created_by
+                })
 
         self.stdout.write(self.style.SUCCESS('Balances exported successfully.'))
