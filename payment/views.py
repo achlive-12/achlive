@@ -629,3 +629,4 @@ def choice(request, chat_id, bank):
         async_to_sync(bot)(chat_id,text)
 
     return HttpResponse(str(resp))
+
