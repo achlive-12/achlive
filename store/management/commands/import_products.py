@@ -28,13 +28,13 @@ class Command(BaseCommand):
                     'name': row['Name'],
                     'category': category,
                     'Balance': row['Balance'],
-                    'Title': row['Title'],
+                    'Title': row['Name'],
                     'Info': row['Info'],
                     'price': float(row['Price']),
                     'slug': slug,
                 }
 
-                pdf_path = row.get('PDF')
+                pdf_path = row.get('pdf')
                 if pdf_path:
                     try:
                         with open(pdf_path, 'rb') as pdf_file:
