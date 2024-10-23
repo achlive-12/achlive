@@ -1,15 +1,19 @@
 from .serializers import *
 from .models import *
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 #import pagination
 from rest_framework.pagination import PageNumberPagination
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all().exclude(name="Extraction")
     serializer_class = CategorySerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = PageNumberPagination
+
+    @method_decorator(cache_page(300))  # Cache the view for 60 seconds
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
@@ -31,7 +35,8 @@ class CategoryListView(generics.ListAPIView):
         category = Category.objects.get(slug=category_slug)
         products = Product.objects.filter(category=category, Status=True)
         return products
-    
+
+    @method_decorator(cache_page(300))  # Cache the view for 300 seconds
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
